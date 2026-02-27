@@ -1,16 +1,5 @@
 # ══════════════════════════════════════════════════════════════════════════════
 # app.py  —  Streamlit 진입점 (오케스트레이션만 담당)
-#
-# 실행: streamlit run app.py
-#
-# 의존 모듈:
-#   config.py            상수 (COL_IDX, MONTH_KR, GROUP_COLORS)
-#   data_loader.py       load_excel, groups_to_json_bytes, json_bytes_to_groups
-#   models.py            aggregate, model_A, model_B
-#   ui_components.py     styled_df, kpi_card, render_waterfall, build_table
-#   ui_sidebar.py        render_sidebar → 사이드바 전체
-#   ui_group_selector.py render_group_selector → 그룹 카드 UI
-#   ui_model_guide.py    render_model_guide → 하단 모델 비교표
 # ══════════════════════════════════════════════════════════════════════════════
 import os, sys
 _HERE = os.path.dirname(os.path.abspath(__file__))
@@ -26,9 +15,24 @@ from config import GROUP_COLORS
 from models import model_A, model_B
 from ui_components import styled_df, kpi_card, render_waterfall, build_table
 from ui_sidebar import render_sidebar
-from ui_group_selector import render_group_selector
 from ui_group_editor import render_group_editor
+from ui_group_selector import render_group_selector
 from ui_model_guide import render_model_guide
+# app.py  —  Streamlit 진입점 (오케스트레이션만 담당)
+#
+# 실행: streamlit run app.py
+#
+# 의존 모듈:
+#   config.py            상수 (COL_IDX, MONTH_KR, GROUP_COLORS)
+#   data_loader.py       load_excel, groups_to_json_bytes, json_bytes_to_groups
+#   models.py            aggregate, model_A, model_B
+#   ui_components.py     styled_df, kpi_card, render_waterfall, build_table
+#   ui_sidebar.py        render_sidebar → 사이드바 전체
+#   ui_group_selector.py render_group_selector → 그룹 카드 UI
+#   ui_model_guide.py    render_model_guide → 하단 모델 비교표
+# ══════════════════════════════════════════════════════════════════════════════
+
+
 
 # ── 페이지 설정 ───────────────────────────────────────────────────────────────
 st.set_page_config(
