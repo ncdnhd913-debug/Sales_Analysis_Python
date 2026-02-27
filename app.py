@@ -116,9 +116,10 @@ if df_all is None:
     st.stop()
 
 # ══════════════════════════════════════════════════════════════════════════════
-# 품목 그룹 설정 (편집 테이블)
+# 품목 그룹 설정 (편집 테이블) — 접기/펼치기
 # ══════════════════════════════════════════════════════════════════════════════
-render_group_editor(df_all)
+with st.expander("📂 품목 그룹 설정  (클릭하여 펼치기 / 접기)", expanded=False):
+    render_group_editor(df_all)
 
 # ── 선택된 모델 배너 ──────────────────────────────────────────────────────────
 is_model_A   = "모델 A" in analysis_model
@@ -155,45 +156,64 @@ with st.spinner("분석 중..."):
     va, va_detail = model_A(df_base, df_curr) if is_model_A else model_B(df_base, df_curr)
 
 # ══════════════════════════════════════════════════════════════════════════════
-# 그룹 / 품목 선택 (컴팩트 multiselect)
+# 분석 대상 선택 — 커스텀 그룹 기준
 # ══════════════════════════════════════════════════════════════════════════════
 all_items    = sorted(va["품목명"].unique())
 item_mapping = st.session_state.get("item_mapping", {})
 
-# item_mapping → groups 구성
-groups: dict = {}
+# item_mapping → groups 구성 (커스텀 그룹 우선, 미분류 후순위)
+custom_groups: dict = {}
 for item in all_items:
-    grp = item_mapping.get(item, "").strip() or "미분류"
-    groups.setdefault(grp, []).append(item)
-if "미분류" in groups and len(groups) > 1:
-    groups["미분류"] = groups.pop("미분류")
+    grp = item_mapping.get(item, "").strip()
+    if grp:
+        custom_groups.setdefault(grp, []).append(item)
 
+unassigned = [i for i in all_items if not item_mapping.get(i, "").strip()]
+
+# 전체 groups (커스텀 + 미분류)
+groups: dict = dict(custom_groups)
+if unassigned:
+    groups["미분류"] = unassigned
+
+has_custom = len(custom_groups) > 0
+custom_group_names = list(custom_groups.keys())
 group_names = list(groups.keys())
 
 st.markdown('<div class="section-header">📦 분석 대상 선택</div>', unsafe_allow_html=True)
 
-col_grp, col_item = st.columns([1, 1])
-with col_grp:
-    selected_groups = st.multiselect(
-        "그룹 선택",
-        options=group_names,
-        default=group_names,
-        key="ms_groups",
-        placeholder="그룹을 선택하세요",
-    )
-
-# 선택된 그룹의 품목 → 개별 품목 추가 필터
-items_in_selected_groups = [
-    item for gn in selected_groups for item in groups.get(gn, [])
-]
-with col_item:
+if has_custom:
+    # ── 커스텀 그룹이 있는 경우: 그룹 선택 → 품목 세부 필터 ─────────────────
+    col_grp, col_item = st.columns([1, 1])
+    with col_grp:
+        selected_groups = st.multiselect(
+            "그룹 선택 (기본: 전체)",
+            options=group_names,
+            default=custom_group_names,   # 커스텀 그룹만 기본 선택, 미분류 제외
+            key="ms_groups",
+            placeholder="그룹을 선택하세요",
+        )
+    items_in_groups = [
+        item for gn in selected_groups for item in groups.get(gn, [])
+    ]
+    with col_item:
+        selected_items = st.multiselect(
+            "품목 세부 필터 (선택 그룹 내)",
+            options=items_in_groups,
+            default=items_in_groups,      # 기본: 선택된 그룹 품목 전체
+            key="ms_items",
+            placeholder="비워두면 선택 그룹 전체",
+        )
+else:
+    # ── 커스텀 그룹 없는 경우: 품목 직접 선택 ───────────────────────────────
+    st.caption("💡 품목 그룹 설정을 먼저 완료하면 그룹 단위로 선택할 수 있습니다.")
     selected_items = st.multiselect(
-        "품목 추가 필터 (선택 그룹 내에서)",
-        options=items_in_selected_groups,
-        default=items_in_selected_groups,
+        "품목 선택 (기본: 전체)",
+        options=all_items,
+        default=all_items,
         key="ms_items",
-        placeholder="전체 (비워두면 그룹 전체)",
+        placeholder="품목을 선택하세요",
     )
+    selected_groups = []
 
 if not selected_items:
     st.warning("그룹 또는 품목을 1개 이상 선택하세요.")
