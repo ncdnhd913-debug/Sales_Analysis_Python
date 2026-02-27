@@ -182,30 +182,35 @@ group_names = list(groups.keys())
 st.markdown('<div class="section-header">📦 분석 대상 선택</div>', unsafe_allow_html=True)
 
 if has_custom:
-    # ── 커스텀 그룹이 있는 경우: 그룹 선택 → 품목 세부 필터 ─────────────────
-    col_grp, col_item = st.columns([1, 1])
+    # ── 커스텀 그룹이 있는 경우 ──────────────────────────────────────────────
+    # 1차: 그룹 선택 → 분석 범위 확정
+    # 2차: 품목 세부 필터 (선택사항 — 비워두면 선택 그룹 전체가 분석 대상)
+    col_grp, col_item = st.columns([3, 2])
     with col_grp:
         selected_groups = st.multiselect(
-            "그룹 선택 (기본: 전체)",
+            "그룹 선택 (기본: 커스텀 그룹 전체)",
             options=group_names,
-            default=custom_group_names,   # 커스텀 그룹만 기본 선택, 미분류 제외
+            default=custom_group_names,
             key="ms_groups",
             placeholder="그룹을 선택하세요",
         )
+    # 선택된 그룹의 품목 전체 → 분석 1차 대상
     items_in_groups = [
         item for gn in selected_groups for item in groups.get(gn, [])
     ]
     with col_item:
-        selected_items = st.multiselect(
-            "품목 세부 필터 (선택 그룹 내)",
+        exclude_items = st.multiselect(
+            "품목 제외 필터 (선택사항)",
             options=items_in_groups,
-            default=items_in_groups,      # 기본: 선택된 그룹 품목 전체
-            key="ms_items",
-            placeholder="비워두면 선택 그룹 전체",
+            default=[],
+            key="ms_exclude",
+            placeholder="제외할 품목만 선택",
         )
+    # 제외 품목 빼고 최종 selected_items 확정
+    selected_items = [i for i in items_in_groups if i not in exclude_items]
 else:
     # ── 커스텀 그룹 없는 경우: 품목 직접 선택 ───────────────────────────────
-    st.caption("💡 품목 그룹 설정을 먼저 완료하면 그룹 단위로 선택할 수 있습니다.")
+    st.caption("💡 품목 그룹 설정을 완료하면 그룹 단위로 선택할 수 있습니다.")
     selected_items = st.multiselect(
         "품목 선택 (기본: 전체)",
         options=all_items,
@@ -266,19 +271,68 @@ else:
         kpi_card(k6, "③ 환율 차이 (FX Exposure)", "P/Q 방향 4-Case 분기", fx_v)
 
 # ══════════════════════════════════════════════════════════════════════════════
-# 상세 테이블
+# 품목별 차이 분석 테이블 — 그룹별 섹션
 # ══════════════════════════════════════════════════════════════════════════════
 st.markdown('<div class="section-header">📋 품목별 차이 분석 테이블</div>', unsafe_allow_html=True)
 
-va_disp_total, money_cols = build_table(
-    va_detail_filtered if show_detail else va_filtered,
-    base_label, curr_label, show_detail
-)
-st.dataframe(
-    styled_df(va_disp_total, money_cols),
-    use_container_width=True,
-    height=min(520, max(260, (len(va_disp_total)+1)*36+40)),
-)
+if has_custom and selected_groups:
+    # 그룹별 탭으로 표시
+    tab_labels = ["전체 합산"] + [gn for gn in selected_groups]
+    tabs = st.tabs(tab_labels)
+
+    # 전체 합산 탭
+    with tabs[0]:
+        va_disp_total, money_cols = build_table(
+            va_detail_filtered if show_detail else va_filtered,
+            base_label, curr_label, show_detail
+        )
+        st.dataframe(
+            styled_df(va_disp_total, money_cols),
+            use_container_width=True,
+            height=min(520, max(260, (len(va_disp_total)+1)*36+40)),
+        )
+
+    # 그룹별 탭
+    for ti, gn in enumerate(selected_groups):
+        with tabs[ti + 1]:
+            grp_items = [i for i in groups.get(gn, []) if i in selected_items]
+            if not grp_items:
+                st.info("선택된 품목이 없습니다.")
+                continue
+            clr = GROUP_COLORS[list(groups.keys()).index(gn) % len(GROUP_COLORS)][0]
+            grp_va_t     = va[va["품목명"].isin(grp_items)]
+            grp_detail_t = va_detail[va_detail["품목명"].isin(grp_items)]
+            g_base = grp_va_t["매출0"].sum()
+            g_curr = grp_va_t["매출1"].sum()
+            g_diff = grp_va_t["총차이"].sum()
+            d_sign = "▲ +" if g_diff >= 0 else "▼ "
+            st.markdown(
+                f'<div style="background:{clr};border-radius:7px;padding:7px 14px;'
+                f'color:white;font-size:0.85rem;font-weight:700;margin-bottom:8px;">'
+                f'📦 {gn} &nbsp;│&nbsp; 기준 {g_base:,.0f}원 → 실적 {g_curr:,.0f}원 '
+                f'&nbsp;│&nbsp; 총차이 {d_sign}{g_diff:,.0f}원</div>',
+                unsafe_allow_html=True,
+            )
+            grp_tbl, grp_money = build_table(
+                grp_detail_t if show_detail else grp_va_t,
+                base_label, curr_label, show_detail
+            )
+            st.dataframe(
+                styled_df(grp_tbl, grp_money),
+                use_container_width=True,
+                height=min(480, max(200, (len(grp_tbl)+1)*36+40)),
+            )
+else:
+    # 커스텀 그룹 없는 경우 기존 단일 테이블
+    va_disp_total, money_cols = build_table(
+        va_detail_filtered if show_detail else va_filtered,
+        base_label, curr_label, show_detail
+    )
+    st.dataframe(
+        styled_df(va_disp_total, money_cols),
+        use_container_width=True,
+        height=min(520, max(260, (len(va_disp_total)+1)*36+40)),
+    )
 
 # ══════════════════════════════════════════════════════════════════════════════
 # 그룹별 드릴다운 (컴팩트 expander)
@@ -416,11 +470,7 @@ try:
 
             def row_style(row):
                 if row.get("품목명","") == "【합 계】":
-                    return ["font-weight:700;background-color:#eef3ff"] * len(row)
-                if str(row.get("검증","")).startswith("⚠️"):
-                    return ["background-color:#fff3cd"] * len(row)
-                if row.get("환종","") == "KRW":
-                    return ["background-color:#f8fff8"] * len(row)
+                    return ["font-weight:700"] * len(row)
                 return [""] * len(row)
 
             st.dataframe(
