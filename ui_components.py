@@ -1,6 +1,12 @@
 # ══════════════════════════════════════════════════════════════════════════════
 # ui_components.py  —  재사용 UI 컴포넌트 (KPI카드·테이블·Waterfall·Bar 차트)
 # ══════════════════════════════════════════════════════════════════════════════
+import os as _os, sys as _sys
+_HERE = _os.path.dirname(_os.path.abspath(__file__))
+if _HERE not in _sys.path:
+    _sys.path.insert(0, _HERE)
+
+
 import numpy as np
 import pandas as pd
 import streamlit as st
