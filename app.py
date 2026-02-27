@@ -12,6 +12,10 @@
 #   ui_group_selector.py render_group_selector → 그룹 카드 UI
 #   ui_model_guide.py    render_model_guide → 하단 모델 비교표
 # ══════════════════════════════════════════════════════════════════════════════
+import sys
+import pathlib
+sys.path.insert(0, str(pathlib.Path(__file__).parent))
+
 import numpy as np
 import pandas as pd
 import streamlit as st
