@@ -1,6 +1,12 @@
 # ══════════════════════════════════════════════════════════════════════════════
 # models.py  —  차이 분석 핵심 계산 로직 (순수 Python/pandas, Streamlit 의존 없음)
 # ══════════════════════════════════════════════════════════════════════════════
+import os as _os, sys as _sys
+_HERE = _os.path.dirname(_os.path.abspath(__file__))
+if _HERE not in _sys.path:
+    _sys.path.insert(0, _HERE)
+
+
 import numpy as np
 import pandas as pd
 
