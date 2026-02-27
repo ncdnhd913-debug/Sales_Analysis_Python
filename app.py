@@ -12,9 +12,10 @@
 #   ui_group_selector.py render_group_selector → 그룹 카드 UI
 #   ui_model_guide.py    render_model_guide → 하단 모델 비교표
 # ══════════════════════════════════════════════════════════════════════════════
-import sys
-import pathlib
-sys.path.insert(0, str(pathlib.Path(__file__).parent))
+import os, sys
+_HERE = os.path.dirname(os.path.abspath(__file__))
+if _HERE not in sys.path:
+    sys.path.insert(0, _HERE)
 
 import numpy as np
 import pandas as pd
