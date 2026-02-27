@@ -1,51 +1,57 @@
 # ══════════════════════════════════════════════════════════════════════════════
-# ui_group_selector.py  —  품목/그룹 선택 카드 UI
+# ui_group_selector.py  —  품목 그룹 선택 카드 UI
+#   item_mapping({품목명: 커스텀그룹명}) → groups({그룹명: [품목명]}) 변환 후 카드 렌더
 # ══════════════════════════════════════════════════════════════════════════════
 import os as _os, sys as _sys
 _HERE = _os.path.dirname(_os.path.abspath(__file__))
 if _HERE not in _sys.path:
     _sys.path.insert(0, _HERE)
 
-
 import streamlit as st
 import pandas as pd
 from config import GROUP_COLORS
 
 
+def _build_groups(item_mapping: dict, all_items: list) -> dict:
+    """
+    item_mapping({품목명: 커스텀그룹명}) + 분석 품목 목록
+    → groups({그룹명: [품목명, ...]})
+    커스텀그룹명이 없거나 빈 문자열이면 '미분류'로 편입.
+    """
+    groups: dict[str, list] = {}
+    for item in all_items:
+        grp = item_mapping.get(item, "").strip()
+        if not grp:
+            grp = "미분류"
+        groups.setdefault(grp, []).append(item)
+
+    # 미분류를 마지막으로
+    if "미분류" in groups:
+        unclassified = groups.pop("미분류")
+        groups["미분류"] = unclassified
+
+    return groups
+
+
 def render_group_selector(va: pd.DataFrame) -> tuple[list[str], dict[str, list[str]]]:
     """
-    분석 결과 DataFrame(va)을 받아 그룹 카드 UI를 렌더링하고,
-    선택된 품목 목록과 그룹 구조를 반환한다.
-
-    반환: (selected_items, groups)
-      selected_items : 선택된 그룹에 속한 품목명 리스트
-      groups         : {그룹명: [품목명, ...]} (미분류 포함)
+    그룹 카드 토글 UI를 렌더링하고 (selected_items, groups) 반환.
     """
     st.markdown('<div class="section-header">📦 분석 대상 선택</div>',
                 unsafe_allow_html=True)
 
-    all_items = sorted(va["품목명"].unique())
-
-    # ── 그룹 구조 계산 ──────────────────────────────────────────────────────
-    groups_raw  = st.session_state.get("item_groups", {})
-    assigned    = {item for items in groups_raw.values() for item in items}
-    unassigned  = [i for i in all_items if i not in assigned]
-
-    groups: dict[str, list[str]] = {}
-    for gn, items in groups_raw.items():
-        valid = [i for i in items if i in all_items]
-        if valid:
-            groups[gn] = valid
-    if unassigned:
-        groups["미분류"] = unassigned
+    all_items    = sorted(va["품목명"].unique())
+    item_mapping = st.session_state.get("item_mapping", {})
+    groups       = _build_groups(item_mapping, all_items)
 
     # ── selected_groups 초기화 ──────────────────────────────────────────────
     if "selected_groups" not in st.session_state:
         st.session_state.selected_groups = set(groups.keys())
 
+    # 새 그룹 자동 선택, 사라진 그룹 정리
+    deselected = st.session_state.get("_deselected_groups", set())
     for gn in groups:
-        if (gn not in st.session_state.selected_groups
-                and gn not in st.session_state.get("_deselected_groups", set())):
+        if gn not in st.session_state.selected_groups and gn not in deselected:
             st.session_state.selected_groups.add(gn)
     st.session_state.selected_groups = {
         g for g in st.session_state.selected_groups if g in groups
@@ -76,12 +82,12 @@ def render_group_selector(va: pd.DataFrame) -> tuple[list[str], dict[str, list[s
         grp_curr  = grp_va["매출1"].sum()
         diff_sign = "▲ +" if grp_diff >= 0 else "▼ "
 
-        card_bg     = clr_active              if is_active else "#f8fafc"
-        card_border = clr_active              if is_active else "#cbd5e1"
+        card_bg     = clr_active               if is_active else "#f8fafc"
+        card_border = clr_active               if is_active else "#cbd5e1"
         tag_bg      = "rgba(255,255,255,0.22)" if is_active else "#e2e8f0"
-        tag_color   = "#ffffff"               if is_active else "#374151"
-        title_color = "#ffffff"               if is_active else clr_dark
-        kpi_color   = "#e0f2fe"               if is_active else "#475569"
+        tag_color   = "#ffffff"                if is_active else "#374151"
+        title_color = "#ffffff"                if is_active else clr_dark
+        kpi_color   = "#e0f2fe"                if is_active else "#475569"
         diff_color  = "#86efac" if is_active else ("#16a34a" if grp_diff >= 0 else "#dc2626")
 
         item_tags = "  ".join(
