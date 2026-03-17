@@ -95,6 +95,7 @@ curr_label     = ctx["curr_label"]
 period_mode    = ctx["period_mode"]
 analysis_model = ctx["analysis_model"]
 show_detail    = ctx["show_detail"]
+is_ytd         = ctx.get("is_ytd", False)
 
 # ══════════════════════════════════════════════════════════════════════════════
 # 타이틀
@@ -451,20 +452,43 @@ if "품목계정_분류" in df_all.columns:
 
     st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
 
-    # ── 분류별 상세 테이블 탭 ────────────────────────────────────────────────
-    acct_tabs = st.tabs(["전체"] + ACCT_CATS)
-    for ti, cat in enumerate(["전체"] + ACCT_CATS):
+    # ── 분류별 + 커스텀 그룹별 상세 테이블 탭 ──────────────────────────────────
+    # 탭 구성: 전체 | 제품 | 상품 | 기타 | [커스텀 그룹1] | [커스텀 그룹2] ...
+    custom_grp_names = list(custom_groups.keys()) if has_custom else []
+    all_tab_labels = ["전체"] + ACCT_CATS + custom_grp_names
+    acct_tabs = st.tabs(all_tab_labels)
+
+    for ti, tab_label in enumerate(all_tab_labels):
         with acct_tabs[ti]:
-            if cat == "전체":
+            if tab_label == "전체":
                 sub_va = va_filtered.copy()
                 sub_vd = va_detail_filtered.copy()
-            else:
-                cat_items = va_acct[va_acct["품목계정_분류"] == cat]["품목명"].tolist()
+            elif tab_label in ACCT_CATS:
+                cat_items = va_acct[va_acct["품목계정_분류"] == tab_label]["품목명"].tolist()
                 sub_va    = va_filtered[va_filtered["품목명"].isin(cat_items)].copy()
                 sub_vd    = va_detail_filtered[va_detail_filtered["품목명"].isin(cat_items)].copy()
+            else:
+                # 커스텀 그룹 탭
+                grp_items = [i for i in groups.get(tab_label, []) if i in selected_items]
+                sub_va    = va_filtered[va_filtered["품목명"].isin(grp_items)].copy()
+                sub_vd    = va_detail_filtered[va_detail_filtered["품목명"].isin(grp_items)].copy()
+                # 그룹 색상 배너
+                gi = list(groups.keys()).index(tab_label) if tab_label in groups else 0
+                clr = GROUP_COLORS[gi % len(GROUP_COLORS)][0]
+                if not sub_va.empty:
+                    g_b = sub_va["매출0"].sum(); g_c = sub_va["매출1"].sum()
+                    g_d = sub_va["총차이"].sum()
+                    d_sign = "▲ +" if g_d >= 0 else "▼ "
+                    st.markdown(
+                        f'<div style="background:{clr};border-radius:7px;padding:6px 14px;'
+                        f'color:white;font-size:0.82rem;font-weight:700;margin-bottom:8px;">'
+                        f'📦 {tab_label} &nbsp;│&nbsp; 기준 {g_b:,.0f}원 → 실적 {g_c:,.0f}원'
+                        f'&nbsp;│&nbsp; 총차이 {d_sign}{g_d:,.0f}원</div>',
+                        unsafe_allow_html=True,
+                    )
 
             if sub_va.empty:
-                st.info(f"{cat} 분류의 데이터가 없습니다.")
+                st.info(f"{tab_label} 분류의 데이터가 없습니다.")
                 continue
 
             tbl, mc = build_table(
