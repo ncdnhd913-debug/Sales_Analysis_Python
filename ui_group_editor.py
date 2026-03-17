@@ -4,6 +4,7 @@ from io import BytesIO
 from collections import Counter
 
 
+@st.cache_data
 def _mapping_to_excel(editor_df):
     buf = BytesIO()
     with pd.ExcelWriter(buf, engine="openpyxl") as writer:
@@ -48,18 +49,23 @@ def render_group_editor(df_all):
             key="upload_group_excel",
         )
         if uploaded:
-            loaded = _excel_to_mapping(uploaded.read())
-            if loaded:
-                st.session_state.item_mapping = loaded
-                # data_editor 위젯 캐시 초기화 → 새 매핑 즉시 반영
-                st.session_state.pop("group_editor_table", None)
-                # 그룹 선택 위젯도 초기화 → 새 그룹으로 재설정
-                st.session_state.pop("ms_groups", None)
-                st.session_state.pop("known_custom_groups", None)
-                st.success("불러오기 완료")
-                st.rerun()
-            else:
-                st.error("파일 형식 오류 (품목명, 커스텀 그룹명 열 필요)")
+            # file_id로 중복 처리 방지 — rerun 후 파일이 남아있어 무한루프 발생하는 버그 차단
+            fid = getattr(uploaded, "file_id", uploaded.name)
+            if st.session_state.get("_last_grp_file_id") != fid:
+                loaded = _excel_to_mapping(uploaded.read())
+                if loaded:
+                    st.session_state.item_mapping = loaded
+                    st.session_state["_last_grp_file_id"] = fid
+                    # data_editor 위젯 초기화 → 새 매핑 즉시 반영
+                    st.session_state.pop("group_editor_table", None)
+                    # 그룹 선택 위젯 초기화
+                    st.session_state.pop("ms_groups", None)
+                    st.session_state.pop("known_custom_groups", None)
+                    st.success("불러오기 완료")
+                    st.rerun()
+                else:
+                    st.session_state["_last_grp_file_id"] = fid  # 오류도 중복 방지
+                    st.error("파일 형식 오류 (품목명, 커스텀 그룹명 열 필요)")
 
     with col_dl:
         dl_df = items_df.copy()
