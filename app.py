@@ -286,21 +286,19 @@ else:
 st.markdown('<div class="section-header">📋 커스텀 그룹별 차이 분석</div>', unsafe_allow_html=True)
 
 # ── 그룹별 요약 렌더 헬퍼 ────────────────────────────────────────────────────
-def _render_group_rows(grp_list, grp_map, color_map, va_src, va_detail_src, key_prefix):
+def _render_group_section(grp_list, grp_map, color_map, va_src, va_detail_src, sel_key):
     """
-    grp_list  : 표시할 그룹명 리스트
-    grp_map   : {그룹명: [품목명, ...]}
-    color_map : {그룹명: hex color}
+    그룹 요약 배너 + 단일 selectbox 드롭다운으로 세부 품목 표시.
+    sel_key: selectbox session_state key (섹션별 고유값)
     """
     if not grp_list:
         st.info("표시할 그룹이 없습니다.")
         return
 
     # 전체 합산 배너
-    tot_va  = va_src[va_src["품목명"].isin(
-        [i for gn in grp_list for i in grp_map.get(gn,[])])]
-    t_b = tot_va["매출0"].sum(); t_c = tot_va["매출1"].sum()
-    t_d = tot_va["총차이"].sum()
+    all_items_in = [i for gn in grp_list for i in grp_map.get(gn, [])]
+    tot_va = va_src[va_src["품목명"].isin(all_items_in)]
+    t_b = tot_va["매출0"].sum(); t_c = tot_va["매출1"].sum(); t_d = tot_va["총차이"].sum()
     t_q = tot_va["수량차이"].sum(); t_p = tot_va["단가차이"].sum(); t_f = tot_va["환율차이"].sum()
     d_s = "▲ +" if t_d >= 0 else "▼ "
     d_cl = "#16a34a" if t_d >= 0 else "#dc2626"
@@ -315,19 +313,17 @@ def _render_group_rows(grp_list, grp_map, color_map, va_src, va_detail_src, key_
       </span>
     </div>""", unsafe_allow_html=True)
 
-    # 그룹별 행
-    for gi, gn in enumerate(grp_list):
+    # 그룹별 요약 배너 (모두 표시)
+    for gn in grp_list:
         items = grp_map.get(gn, [])
         if not items:
             continue
-        clr   = color_map.get(gn, "#1e40af")
-        g_va  = va_src[va_src["품목명"].isin(items)]
-        g_b   = g_va["매출0"].sum(); g_c = g_va["매출1"].sum()
-        g_d   = g_va["총차이"].sum()
-        g_q   = g_va["수량차이"].sum(); g_p = g_va["단가차이"].sum(); g_f = g_va["환율차이"].sum()
-        d_s2  = "▲ +" if g_d >= 0 else "▼ "
+        clr  = color_map.get(gn, "#1e40af")
+        g_va = va_src[va_src["품목명"].isin(items)]
+        g_b  = g_va["매출0"].sum(); g_c = g_va["매출1"].sum(); g_d = g_va["총차이"].sum()
+        g_q  = g_va["수량차이"].sum(); g_p = g_va["단가차이"].sum(); g_f = g_va["환율차이"].sum()
+        d_s2 = "▲ +" if g_d >= 0 else "▼ "
         d_cl2 = "#d1fae5" if g_d >= 0 else "#fee2e2"
-
         st.markdown(f"""
         <div style="background:{clr};border-radius:8px;padding:8px 16px;
                     display:flex;justify-content:space-between;align-items:center;margin-bottom:3px;">
@@ -342,13 +338,37 @@ def _render_group_rows(grp_list, grp_map, color_map, va_src, va_detail_src, key_
           </span>
         </div>""", unsafe_allow_html=True)
 
-        with st.expander(f"  세부 품목 보기 ({len(items)}개)", expanded=False):
-            g_vd = va_detail_src[va_detail_src["품목명"].isin(items)]
-            tbl, mc = build_table(
-                g_vd if show_detail else g_va,
-                base_label, curr_label, show_detail)
-            st.dataframe(styled_df(tbl, mc), use_container_width=True,
-                         height=min(400, max(180, (len(tbl)+1)*36+40)))
+    # 단일 드롭다운 → 선택 그룹의 세부 품목 테이블 표시
+    st.markdown("<div style='height:6px'></div>", unsafe_allow_html=True)
+    dropdown_options = ["— 그룹을 선택하면 세부 품목이 표시됩니다 —"] + grp_list
+    selected_drp = st.selectbox(
+        "세부 품목 보기",
+        options=dropdown_options,
+        index=0,
+        key=sel_key,
+        label_visibility="collapsed",
+    )
+    if selected_drp != dropdown_options[0]:
+        drp_items = grp_map.get(selected_drp, [])
+        drp_va    = va_src[va_src["품목명"].isin(drp_items)]
+        drp_vd    = va_detail_src[va_detail_src["품목명"].isin(drp_items)]
+        clr2 = color_map.get(selected_drp, "#1e40af")
+        st.markdown(
+            f'<div style="background:{clr2};border-radius:7px;padding:6px 14px;'
+            f'color:white;font-size:0.82rem;font-weight:700;margin-bottom:8px;">'
+            f'📦 {selected_drp} — 세부 품목 ({len(drp_items)}개)</div>',
+            unsafe_allow_html=True)
+        tbl, mc = build_table(
+            drp_vd if show_detail else drp_va,
+            base_label, curr_label, show_detail)
+        st.dataframe(styled_df(tbl, mc), use_container_width=True,
+                     height=min(420, max(180, (len(tbl)+1)*36+40)))
+
+
+# ── va_disp_total 항상 정의 (다운로드용) ─────────────────────────────────────
+va_disp_total, money_cols = build_table(
+    va_detail_filtered if show_detail else va_filtered,
+    base_label, curr_label, show_detail)
 
 if has_custom and selected_groups:
     grp_colors = {
@@ -356,15 +376,11 @@ if has_custom and selected_groups:
         for i, gn in enumerate(list(groups.keys()))
         if gn != "미분류"
     }
-    sel_grp_map = {gn: [i for i in groups.get(gn,[]) if i in selected_items]
+    sel_grp_map = {gn: [i for i in groups.get(gn, []) if i in selected_items]
                    for gn in selected_groups}
-    _render_group_rows(selected_groups, sel_grp_map, grp_colors,
-                       va_filtered, va_detail_filtered, "main")
+    _render_group_section(selected_groups, sel_grp_map, grp_colors,
+                          va_filtered, va_detail_filtered, "drp_main")
 else:
-    # 커스텀 그룹 없는 경우: 품목별 단일 테이블
-    va_disp_total, money_cols = build_table(
-        va_detail_filtered if show_detail else va_filtered,
-        base_label, curr_label, show_detail)
     st.dataframe(styled_df(va_disp_total, money_cols), use_container_width=True,
                  height=min(520, max(260, (len(va_disp_total)+1)*36+40)))
 
@@ -444,8 +460,8 @@ if "품목계정_분류" in df_all.columns:
                 }
                 tab_va  = va_filtered[va_filtered["품목명"].isin(tab_items)]
                 tab_vd  = va_detail_filtered[va_detail_filtered["품목명"].isin(tab_items)]
-                _render_group_rows(tab_grp_list, tab_grp_map, grp_colors_acct,
-                                   tab_va, tab_vd, f"acct_{cat_label}")
+                _render_group_section(tab_grp_list, tab_grp_map, grp_colors_acct,
+                                     tab_va, tab_vd, f"drp_acct_{cat_label}")
             else:
                 # 커스텀 그룹 없으면 품목명 단위 테이블
                 sub_va = va_filtered[va_filtered["품목명"].isin(tab_items)].copy()
