@@ -389,6 +389,94 @@ if st.session_state.get("item_mapping") and len(selected_groups) > 0:
             )
             st.markdown("---")
 
+
+# ══════════════════════════════════════════════════════════════════════════════
+# 품목계정 분류별 차이 분석 (제품 / 상품 / 기타)
+# ══════════════════════════════════════════════════════════════════════════════
+if "품목계정_분류" in df_all.columns:
+    st.markdown('<div class="section-header">🗂️ 품목계정 분류별 차이 분석</div>',
+                unsafe_allow_html=True)
+    st.caption("제품 / 상품 / 기타(원재료·부재료·제조-수선비) 기준 집계")
+
+    # 품목명 → 품목계정_분류 매핑 (df_all 기준)
+    acct_map = (
+        df_all[["품목명", "품목계정_분류"]]
+        .drop_duplicates(subset=["품목명"])
+        .set_index("품목명")["품목계정_분류"]
+        .to_dict()
+    )
+
+    ACCT_CATS   = ["제품", "상품", "기타"]
+    ACCT_COLORS = {"제품": "#1e40af", "상품": "#065f46", "기타": "#7c3aed"}
+
+    # va_filtered에 분류 컬럼 추가
+    va_acct = va_filtered.copy()
+    va_acct["품목계정_분류"] = va_acct["품목명"].map(acct_map).fillna("기타")
+
+    # ── 분류별 KPI 요약 카드 ─────────────────────────────────────────────────
+    acct_cols = st.columns(len(ACCT_CATS))
+    for ci, cat in enumerate(ACCT_CATS):
+        sub = va_acct[va_acct["품목계정_분류"] == cat]
+        c_base = sub["매출0"].sum()
+        c_curr = sub["매출1"].sum()
+        c_diff = sub["총차이"].sum()
+        c_qty  = sub["수량차이"].sum()
+        c_prc  = sub["단가차이"].sum()
+        c_fx   = sub["환율차이"].sum()
+        clr    = ACCT_COLORS[cat]
+        d_sign = "▲ +" if c_diff >= 0 else "▼ "
+        d_clr  = "#16a34a" if c_diff >= 0 else "#dc2626"
+        acct_cols[ci].markdown(f"""
+        <div style="background:white;border:1px solid #e2e8f0;border-top:4px solid {clr};
+                    border-radius:10px;padding:14px 16px;box-shadow:0 1px 4px rgba(0,0,0,0.06);">
+          <div style="font-size:0.82rem;font-weight:800;color:{clr};margin-bottom:8px;">
+            {cat}
+          </div>
+          <div style="font-size:0.75rem;color:#64748b;margin-bottom:2px;">기준 매출</div>
+          <div style="font-size:1.0rem;font-weight:700;color:#1e293b;margin-bottom:6px;">
+            {c_base:,.0f}원
+          </div>
+          <div style="font-size:0.75rem;color:#64748b;margin-bottom:2px;">실적 매출</div>
+          <div style="font-size:1.0rem;font-weight:700;color:#1e293b;margin-bottom:6px;">
+            {c_curr:,.0f}원
+          </div>
+          <div style="font-size:0.75rem;color:#64748b;margin-bottom:2px;">총 차이</div>
+          <div style="font-size:1.1rem;font-weight:900;color:{d_clr};">
+            {d_sign}{c_diff:,.0f}원
+          </div>
+          <div style="font-size:0.7rem;color:#94a3b8;margin-top:5px;">
+            ① {c_qty:+,.0f} &nbsp; ② {c_prc:+,.0f} &nbsp; ③ {c_fx:+,.0f}
+          </div>
+        </div>""", unsafe_allow_html=True)
+
+    st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
+
+    # ── 분류별 상세 테이블 탭 ────────────────────────────────────────────────
+    acct_tabs = st.tabs(["전체"] + ACCT_CATS)
+    for ti, cat in enumerate(["전체"] + ACCT_CATS):
+        with acct_tabs[ti]:
+            if cat == "전체":
+                sub_va = va_filtered.copy()
+                sub_vd = va_detail_filtered.copy()
+            else:
+                cat_items = va_acct[va_acct["품목계정_분류"] == cat]["품목명"].tolist()
+                sub_va    = va_filtered[va_filtered["품목명"].isin(cat_items)].copy()
+                sub_vd    = va_detail_filtered[va_detail_filtered["품목명"].isin(cat_items)].copy()
+
+            if sub_va.empty:
+                st.info(f"{cat} 분류의 데이터가 없습니다.")
+                continue
+
+            tbl, mc = build_table(
+                sub_vd if show_detail else sub_va,
+                base_label, curr_label, show_detail
+            )
+            st.dataframe(
+                styled_df(tbl, mc),
+                use_container_width=True,
+                height=min(480, max(200, (len(tbl)+1)*36+40)),
+            )
+
 # ══════════════════════════════════════════════════════════════════════════════
 # 시각화
 # ══════════════════════════════════════════════════════════════════════════════
