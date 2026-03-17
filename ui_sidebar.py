@@ -75,9 +75,7 @@ def render_sidebar():
 
             st.markdown("### 🔀 비교 기간")
             period_mode = st.radio("기준 기간 설정",
-                                   ["전년 동월 대비 (YoY)", "전월 대비 (MoM)", "전년 동기 누적 대비 (YTD)"],
-                                   index=0)
-
+                                   ["전년 동월 대비 (YoY)", "전월 대비 (MoM)", "전년 동기 누적 대비 (YTD)"], index=0)
             is_ytd = (period_mode == "전년 동기 누적 대비 (YTD)")
 
             if period_mode == "전년 동월 대비 (YoY)":
@@ -89,7 +87,7 @@ def render_sidebar():
                 base_year, base_month = curr_year - 1, curr_month
 
             if is_ytd:
-                m_range = list(range(1, curr_month + 1))
+                ytd_months = list(range(1, curr_month + 1))
                 base_label = f"{base_year}년 1~{MONTH_KR[curr_month]} 누적"
                 curr_label = f"{curr_year}년 1~{MONTH_KR[curr_month]} 누적"
             else:
@@ -117,8 +115,8 @@ def render_sidebar():
             st.caption("🆕 신규 품목은 당해 매출 전액을 수량차이로 귀속 (단가·환율차이=0)")
 
             if is_ytd:
-                df_base = df_all[(df_all["연도"] == base_year) & (df_all["월"].isin(m_range))].copy()
-                df_curr = df_all[(df_all["연도"] == curr_year) & (df_all["월"].isin(m_range))].copy()
+                df_base = df_all[(df_all["연도"] == base_year) & (df_all["월"].isin(ytd_months))].copy()
+                df_curr = df_all[(df_all["연도"] == curr_year) & (df_all["월"].isin(ytd_months))].copy()
             else:
                 df_base = df_all[(df_all["연도"] == base_year) & (df_all["월"] == base_month)].copy()
                 df_curr = df_all[(df_all["연도"] == curr_year) & (df_all["월"] == curr_month)].copy()
