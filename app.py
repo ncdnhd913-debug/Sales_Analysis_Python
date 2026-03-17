@@ -305,36 +305,54 @@ def _render_group_section(grp_list, grp_map, color_map, va_src, va_detail_src, s
         key=sel_key,
     )
 
-    # ② 그룹별 요약 표 데이터 구성
-    rows = []
+    # ② 그룹별 요약 표 데이터 구성 (합계는 마지막 행)
     all_items_in = [i for gn in grp_list for i in grp_map.get(gn, [])]
     tot = va_src[va_src["품목명"].isin(all_items_in)]
-    rows.append({
-        "그룹": "【전체 합산】",
-        f"기준매출 [{base_label}]": tot["매출0"].sum(),
-        f"실적매출 [{curr_label}]": tot["매출1"].sum(),
-        "총차이(원)":   tot["총차이"].sum(),
-        "①수량차이":   tot["수량차이"].sum(),
-        "②단가차이":   tot["단가차이"].sum(),
-        "③환율차이":   tot["환율차이"].sum(),
-    })
+    bl = base_label; cl = curr_label
+
+    data_rows = []
     for gn in grp_list:
         items = grp_map.get(gn, [])
         if not items:
             continue
         g_va = va_src[va_src["품목명"].isin(items)]
-        rows.append({
+        data_rows.append({
             "그룹": f"📦 {gn}  ({len(items)}개 품목)",
-            f"기준매출 [{base_label}]": g_va["매출0"].sum(),
-            f"실적매출 [{curr_label}]": g_va["매출1"].sum(),
-            "총차이(원)":   g_va["총차이"].sum(),
-            "①수량차이":   g_va["수량차이"].sum(),
-            "②단가차이":   g_va["단가차이"].sum(),
-            "③환율차이":   g_va["환율차이"].sum(),
+            f"기준매출 [{bl}]": g_va["매출0"].sum(),
+            f"실적매출 [{cl}]": g_va["매출1"].sum(),
+            "총차이(원)":  g_va["총차이"].sum(),
+            "①수량차이":  g_va["수량차이"].sum(),
+            "②단가차이":  g_va["단가차이"].sum(),
+            "③환율차이":  g_va["환율차이"].sum(),
+            "_is_total": False,
         })
 
-    tbl_df = pd.DataFrame(rows)
-    money_c = [c for c in tbl_df.columns if c != "그룹"]
+    total_row = {
+        "그룹": "【합 계】",
+        f"기준매출 [{bl}]": tot["매출0"].sum(),
+        f"실적매출 [{cl}]": tot["매출1"].sum(),
+        "총차이(원)":  tot["총차이"].sum(),
+        "①수량차이":  tot["수량차이"].sum(),
+        "②단가차이":  tot["단가차이"].sum(),
+        "③환율차이":  tot["환율차이"].sum(),
+        "_is_total": True,
+    }
+
+    # 정렬 state: 컬럼 클릭 시 데이터 행만 정렬, 합계 행은 항상 마지막
+    sort_key = f"{sel_key}_sort"
+    sort_col = st.session_state.get(sort_key, None)
+    sort_asc = st.session_state.get(f"{sort_key}_asc", True)
+
+    tbl_df_data = pd.DataFrame(data_rows)
+    money_c = [c for c in tbl_df_data.columns if c not in ("그룹", "_is_total")]
+
+    if sort_col and sort_col in tbl_df_data.columns:
+        tbl_df_data = tbl_df_data.sort_values(sort_col, ascending=sort_asc)
+
+    # 합계 행을 맨 아래 추가
+    tbl_df = pd.concat(
+        [tbl_df_data, pd.DataFrame([total_row])], ignore_index=True
+    ).drop(columns=["_is_total"])
 
     def _style_grp_tbl(df):
         def color(v):
@@ -351,8 +369,9 @@ def _render_group_section(grp_list, grp_map, color_map, va_src, va_detail_src, s
             if c in df.columns:
                 styler = styler.applymap(color, subset=[c])
         def row_hi(row):
-            if "전체 합산" in str(row.get("그룹", "")):
-                return ["background-color:#f0f4ff;font-weight:700"] * len(row)
+            # 합계 행: 다른 행과 동일한 배경 + 볼드만 적용
+            if "합 계" in str(row.get("그룹", "")):
+                return ["font-weight:700;border-top:1.5px solid #94a3b8"] * len(row)
             return [""] * len(row)
         return styler.apply(row_hi, axis=1)
 
