@@ -51,6 +51,11 @@ def render_group_editor(df_all):
             loaded = _excel_to_mapping(uploaded.read())
             if loaded:
                 st.session_state.item_mapping = loaded
+                # data_editor 위젯 캐시 초기화 → 새 매핑 즉시 반영
+                st.session_state.pop("group_editor_table", None)
+                # 그룹 선택 위젯도 초기화 → 새 그룹으로 재설정
+                st.session_state.pop("ms_groups", None)
+                st.session_state.pop("known_custom_groups", None)
                 st.success("불러오기 완료")
                 st.rerun()
             else:
