@@ -285,84 +285,107 @@ else:
 # ══════════════════════════════════════════════════════════════════════════════
 st.markdown('<div class="section-header">📋 커스텀 그룹별 차이 분석</div>', unsafe_allow_html=True)
 
-# ── 그룹별 요약 렌더 헬퍼 ────────────────────────────────────────────────────
+# ── 그룹별 표 + 드롭다운 헬퍼 ───────────────────────────────────────────────
 def _render_group_section(grp_list, grp_map, color_map, va_src, va_detail_src, sel_key):
     """
-    그룹 요약 배너 + 단일 selectbox 드롭다운으로 세부 품목 표시.
-    sel_key: selectbox session_state key (섹션별 고유값)
+    ① 상단: 드롭다운 selectbox (어느 그룹 세부 품목을 볼지 선택)
+    ② 중단: 그룹별 요약 표 (행=그룹, 열=기준매출/실적매출/총차이/①②③)
+    ③ 하단: 선택된 그룹의 품목별 상세 테이블
     """
     if not grp_list:
         st.info("표시할 그룹이 없습니다.")
         return
 
-    # 전체 합산 배너
-    all_items_in = [i for gn in grp_list for i in grp_map.get(gn, [])]
-    tot_va = va_src[va_src["품목명"].isin(all_items_in)]
-    t_b = tot_va["매출0"].sum(); t_c = tot_va["매출1"].sum(); t_d = tot_va["총차이"].sum()
-    t_q = tot_va["수량차이"].sum(); t_p = tot_va["단가차이"].sum(); t_f = tot_va["환율차이"].sum()
-    d_s = "▲ +" if t_d >= 0 else "▼ "
-    d_cl = "#16a34a" if t_d >= 0 else "#dc2626"
-    st.markdown(f"""
-    <div style="background:#1e293b;border-radius:8px;padding:9px 16px;
-                display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
-      <span style="color:white;font-weight:800;font-size:0.88rem;">전체 합산</span>
-      <span style="color:white;font-size:0.78rem;">
-        기준 {t_b:,.0f}원 → 실적 {t_c:,.0f}원 &nbsp;│&nbsp;
-        총차이 <span style="color:{d_cl};font-weight:900;">{d_s}{t_d:,.0f}원</span>
-        &nbsp;(① {t_q:+,.0f} ② {t_p:+,.0f} ③ {t_f:+,.0f})
-      </span>
-    </div>""", unsafe_allow_html=True)
+    # ① 드롭다운 (상단 배치)
+    dropdown_opts = ["전체 합산"] + grp_list
+    selected_drp = st.selectbox(
+        "세부 품목 드릴다운",
+        options=dropdown_opts,
+        index=0,
+        key=sel_key,
+    )
 
-    # 그룹별 요약 배너 (모두 표시)
+    # ② 그룹별 요약 표 데이터 구성
+    rows = []
+    all_items_in = [i for gn in grp_list for i in grp_map.get(gn, [])]
+    tot = va_src[va_src["품목명"].isin(all_items_in)]
+    rows.append({
+        "그룹": "【전체 합산】",
+        f"기준매출 [{base_label}]": tot["매출0"].sum(),
+        f"실적매출 [{curr_label}]": tot["매출1"].sum(),
+        "총차이(원)":   tot["총차이"].sum(),
+        "①수량차이":   tot["수량차이"].sum(),
+        "②단가차이":   tot["단가차이"].sum(),
+        "③환율차이":   tot["환율차이"].sum(),
+    })
     for gn in grp_list:
         items = grp_map.get(gn, [])
         if not items:
             continue
-        clr  = color_map.get(gn, "#1e40af")
         g_va = va_src[va_src["품목명"].isin(items)]
-        g_b  = g_va["매출0"].sum(); g_c = g_va["매출1"].sum(); g_d = g_va["총차이"].sum()
-        g_q  = g_va["수량차이"].sum(); g_p = g_va["단가차이"].sum(); g_f = g_va["환율차이"].sum()
-        d_s2 = "▲ +" if g_d >= 0 else "▼ "
-        d_cl2 = "#d1fae5" if g_d >= 0 else "#fee2e2"
-        st.markdown(f"""
-        <div style="background:{clr};border-radius:8px;padding:8px 16px;
-                    display:flex;justify-content:space-between;align-items:center;margin-bottom:3px;">
-          <span style="color:white;font-weight:800;font-size:0.86rem;">
-            📦 {gn} &nbsp;<span style="font-size:0.72rem;opacity:0.8;">({len(items)}개 품목)</span>
-          </span>
-          <span style="color:white;font-size:0.77rem;text-align:right;">
-            기준 {g_b:,.0f}원 → 실적 {g_c:,.0f}원 &nbsp;│&nbsp;
-            총차이 <span style="background:rgba(0,0,0,0.25);border-radius:4px;padding:1px 6px;
-                              color:{d_cl2};font-weight:900;">{d_s2}{g_d:,.0f}원</span>
-            &nbsp;(① {g_q:+,.0f} ② {g_p:+,.0f} ③ {g_f:+,.0f})
-          </span>
-        </div>""", unsafe_allow_html=True)
+        rows.append({
+            "그룹": f"📦 {gn}  ({len(items)}개 품목)",
+            f"기준매출 [{base_label}]": g_va["매출0"].sum(),
+            f"실적매출 [{curr_label}]": g_va["매출1"].sum(),
+            "총차이(원)":   g_va["총차이"].sum(),
+            "①수량차이":   g_va["수량차이"].sum(),
+            "②단가차이":   g_va["단가차이"].sum(),
+            "③환율차이":   g_va["환율차이"].sum(),
+        })
 
-    # 단일 드롭다운 → 선택 그룹의 세부 품목 테이블 표시
-    st.markdown("<div style='height:6px'></div>", unsafe_allow_html=True)
-    dropdown_options = ["— 그룹을 선택하면 세부 품목이 표시됩니다 —"] + grp_list
-    selected_drp = st.selectbox(
-        "세부 품목 보기",
-        options=dropdown_options,
-        index=0,
-        key=sel_key,
-        label_visibility="collapsed",
+    tbl_df = pd.DataFrame(rows)
+    money_c = [c for c in tbl_df.columns if c != "그룹"]
+
+    def _style_grp_tbl(df):
+        def color(v):
+            try:
+                fv = float(v)
+                if fv < 0: return "color:#c0392b;font-weight:600"
+                if fv > 0: return "color:#1a7a4a;font-weight:600"
+            except: pass
+            return ""
+        diff_cols = ["총차이(원)", "①수량차이", "②단가차이", "③환율차이"]
+        fmt = {c: "{:,.0f}" for c in money_c}
+        styler = df.style.format(fmt, na_rep="-")
+        for c in diff_cols:
+            if c in df.columns:
+                styler = styler.applymap(color, subset=[c])
+        def row_hi(row):
+            if "전체 합산" in str(row.get("그룹", "")):
+                return ["background-color:#f0f4ff;font-weight:700"] * len(row)
+            return [""] * len(row)
+        return styler.apply(row_hi, axis=1)
+
+    st.dataframe(
+        _style_grp_tbl(tbl_df),
+        use_container_width=True,
+        hide_index=True,
+        height=min(500, max(120, (len(tbl_df)+1)*36+40)),
     )
-    if selected_drp != dropdown_options[0]:
+
+    # ③ 선택된 그룹의 품목별 상세
+    if selected_drp == "전체 합산":
+        drp_items = all_items_in
+        clr2 = "#1e293b"
+        title = f"전체 합산 — 품목별 상세 ({len(drp_items)}개)"
+    else:
         drp_items = grp_map.get(selected_drp, [])
-        drp_va    = va_src[va_src["품목명"].isin(drp_items)]
-        drp_vd    = va_detail_src[va_detail_src["품목명"].isin(drp_items)]
         clr2 = color_map.get(selected_drp, "#1e40af")
+        title = f"📦 {selected_drp} — 세부 품목 ({len(drp_items)}개)"
+
+    if drp_items:
         st.markdown(
             f'<div style="background:{clr2};border-radius:7px;padding:6px 14px;'
-            f'color:white;font-size:0.82rem;font-weight:700;margin-bottom:8px;">'
-            f'📦 {selected_drp} — 세부 품목 ({len(drp_items)}개)</div>',
+            f'color:white;font-size:0.82rem;font-weight:700;margin:8px 0 6px 0;">'
+            f'{title}</div>',
             unsafe_allow_html=True)
-        tbl, mc = build_table(
+        drp_va = va_src[va_src["품목명"].isin(drp_items)]
+        drp_vd = va_detail_src[va_detail_src["품목명"].isin(drp_items)]
+        dtbl, dmc = build_table(
             drp_vd if show_detail else drp_va,
             base_label, curr_label, show_detail)
-        st.dataframe(styled_df(tbl, mc), use_container_width=True,
-                     height=min(420, max(180, (len(tbl)+1)*36+40)))
+        st.dataframe(styled_df(dtbl, dmc), use_container_width=True,
+                     height=min(460, max(180, (len(dtbl)+1)*36+40)))
 
 
 # ── va_disp_total 항상 정의 (다운로드용) ─────────────────────────────────────
@@ -383,7 +406,6 @@ if has_custom and selected_groups:
 else:
     st.dataframe(styled_df(va_disp_total, money_cols), use_container_width=True,
                  height=min(520, max(260, (len(va_disp_total)+1)*36+40)))
-
 
 # ══════════════════════════════════════════════════════════════════════════════
 # 품목계정 분류별 차이 분석 (제품 / 상품 / 기타)
