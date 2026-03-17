@@ -75,7 +75,8 @@ def render_sidebar():
 
             st.markdown("### 🔀 비교 기간")
             period_mode = st.radio("기준 기간 설정",
-                                   ["전년 동월 대비 (YoY)", "전월 대비 (MoM)", "전년 동기 누적 대비 (YTD)"], index=0)
+                                   ["전년 동월 대비 (YoY)", "전월 대비 (MoM)", "전년 동기 누적 대비 (YTD)"],
+                                   index=0, key="period_mode_radio")
             is_ytd = (period_mode == "전년 동기 누적 대비 (YTD)")
 
             if period_mode == "전년 동월 대비 (YoY)":
