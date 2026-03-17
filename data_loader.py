@@ -38,6 +38,13 @@ def load_excel(file_bytes: bytes, file_name: str) -> pd.DataFrame | None:
         df["연도"]   = df["매출일"].dt.year.astype(int)
         df["월"]     = df["매출일"].dt.month.astype(int)
         df["품목명"] = df["품목명"].fillna("(미분류)").str.strip()
+        # 품목계정 분류: 제품→제품, 상품→상품, 원재료/부재료/제조-수선비→기타
+        def _classify(acc):
+            v = str(acc).strip()
+            if v == "제품":  return "제품"
+            if v == "상품":  return "상품"
+            return "기타"
+        df["품목계정_분류"] = df["품목계정"].apply(_classify)
         return df
     except Exception as e:
         st.error(f"파일 읽기 오류: {e}")
