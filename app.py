@@ -610,6 +610,22 @@ try:
     tab_wf, tab_bar = st.tabs(["🌊 Waterfall (전체 합산)", "📊 품목별 총차이"])
 
     with tab_wf:
+        # ── 분석 대상 그룹 표시 배너 ─────────────────────────────────────────
+        if has_custom and selected_groups:
+            grp_tags = "  ".join(
+                f'<span style="display:inline-block;background:{GROUP_COLORS[i % len(GROUP_COLORS)][0]};'
+                f'color:white;border-radius:12px;padding:2px 10px;font-size:0.75rem;margin:2px;">'
+                f'📦 {gn}</span>'
+                for i, gn in enumerate(selected_groups)
+            )
+            st.markdown(
+                f'<div style="background:var(--background-color,#f8fafc);border:0.5px solid #e2e8f0;'
+                f'border-radius:8px;padding:8px 14px;margin-bottom:6px;font-size:0.8rem;color:#64748b;">'
+                f'<b>분석 대상 그룹:</b>&nbsp;&nbsp;{grp_tags}</div>',
+                unsafe_allow_html=True)
+        else:
+            st.caption(f"분석 대상: 전체 품목 {len(selected_items)}개")
+
         fig_wf = render_waterfall(total_base, qty_v, price_v, fx_v,
                                   total_curr, base_label, curr_label, accent_color)
         st.plotly_chart(fig_wf, use_container_width=True)
