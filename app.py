@@ -582,35 +582,163 @@ price_v    = va_filtered["단가차이"].sum()
 fx_v       = va_filtered["환율차이"].sum()
 all_krw    = va_filtered["is_krw"].all() if "is_krw" in va_filtered.columns else False
 
-k1, k2, k3 = st.columns(3)
-k4, k5, k6 = st.columns(3)
+growth_pct = (total_diff / total_base * 100) if total_base != 0 else 0
+qty_pct    = (qty_v   / abs(total_base) * 100) if total_base != 0 else 0
+price_pct  = (price_v / abs(total_base) * 100) if total_base != 0 else 0
+fx_pct     = (fx_v    / abs(total_base) * 100) if total_base != 0 else 0
+diff_color  = "#34d399" if total_diff >= 0 else "#f87171"
+diff_bg     = "rgba(52,211,153,0.08)" if total_diff >= 0 else "rgba(248,113,113,0.08)"
+diff_border = "rgba(52,211,153,0.3)"  if total_diff >= 0 else "rgba(248,113,113,0.3)"
+diff_arrow  = "+" if total_diff >= 0 else ""
 
-kpi_card(k1, f"기준 매출 ({base_label})", "원화 실적 합계", total_base, neutral=True)
-kpi_card(k2, f"실적 매출 ({curr_label})", "원화 실적 합계", total_curr, neutral=True)
-sign_td = "+" if total_diff > 0 else ""
-card_td = "kpi-card-pos" if total_diff > 0 else ("kpi-card-neg" if total_diff < 0 else "kpi-card-zero")
-val_td  = "kpi-val-pos"  if total_diff > 0 else ("kpi-val-neg"  if total_diff < 0 else "kpi-val-zero")
-k3.markdown(f"""
-<div class="kpi-card {card_td}">
-    <div class="kpi-label">총 차이 <span style="font-size:0.62rem;color:#cbd5e1;">①+②+③</span></div>
-    <div class="kpi-formula">실적 − 기준</div>
-    <div class="kpi-value {val_td}" style="font-size:1.55rem;">{sign_td}{total_diff:,.0f}<span style="font-size:0.8rem;opacity:0.6;margin-left:3px;">원</span></div>
-</div>""", unsafe_allow_html=True)
+# ── 상단: 기준/실적/총차이 3열 ────────────────────────────────────────────────
+st.markdown(f"""
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px;">
+  <div style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);
+              border-top:2px solid #7c3aed;border-radius:12px;padding:16px 18px;">
+    <div style="font-size:0.62rem;font-weight:600;color:#475569;letter-spacing:0.1em;
+                text-transform:uppercase;margin-bottom:5px;">기준 매출</div>
+    <div style="font-size:0.7rem;color:#475569;margin-bottom:6px;">{base_label}</div>
+    <div style="font-size:1.5rem;font-weight:700;color:#e2e8f0;letter-spacing:-0.03em;">
+      {total_base/1e8:,.1f}<span style="font-size:0.78rem;color:#64748b;margin-left:4px;">억원</span></div>
+    <div style="font-size:0.68rem;color:#334155;margin-top:3px;">{total_base:,.0f}원</div>
+  </div>
+  <div style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);
+              border-top:2px solid #0ea5e9;border-radius:12px;padding:16px 18px;">
+    <div style="font-size:0.62rem;font-weight:600;color:#475569;letter-spacing:0.1em;
+                text-transform:uppercase;margin-bottom:5px;">실적 매출</div>
+    <div style="font-size:0.7rem;color:#475569;margin-bottom:6px;">{curr_label}</div>
+    <div style="font-size:1.5rem;font-weight:700;color:#e2e8f0;letter-spacing:-0.03em;">
+      {total_curr/1e8:,.1f}<span style="font-size:0.78rem;color:#64748b;margin-left:4px;">억원</span></div>
+    <div style="font-size:0.68rem;color:#334155;margin-top:3px;">{total_curr:,.0f}원</div>
+  </div>
+  <div style="background:{diff_bg};border:1px solid {diff_border};
+              border-top:2px solid {diff_color};border-radius:12px;padding:16px 18px;">
+    <div style="font-size:0.62rem;font-weight:600;color:#475569;letter-spacing:0.1em;
+                text-transform:uppercase;margin-bottom:5px;">총 차이 (①+②+③)</div>
+    <div style="font-size:0.7rem;color:#475569;margin-bottom:6px;">실적 - 기준</div>
+    <div style="font-size:1.5rem;font-weight:700;color:{diff_color};letter-spacing:-0.03em;">
+      {diff_arrow}{total_diff/1e8:,.1f}<span style="font-size:0.78rem;margin-left:4px;">억원</span></div>
+    <div style="font-size:0.68rem;color:{diff_color};opacity:0.8;margin-top:3px;">
+      {diff_arrow}{total_diff:,.0f}원 ({growth_pct:+.1f}%)</div>
+  </div>
+</div>
+""", unsafe_allow_html=True)
 
+# ── 요인 분해 바 ─────────────────────────────────────────────────────────────
+max_abs = max(abs(qty_v), abs(price_v), abs(fx_v), 1)
+
+def _factor_row(num, label, formula, val):
+    clr = "#34d399" if val >= 0 else "#f87171"
+    bgc = "rgba(52,211,153,0.06)" if val >= 0 else "rgba(248,113,113,0.06)"
+    bdr = "rgba(52,211,153,0.18)" if val >= 0 else "rgba(248,113,113,0.18)"
+    w   = min(100, abs(val) / max(abs(max_abs), 1) * 100)
+    pct = val / abs(total_base) * 100 if total_base != 0 else 0
+    sgn = "+" if val >= 0 else ""
+    return (
+        f'<div style="background:{bgc};border:1px solid {bdr};border-radius:10px;'
+        f'padding:11px 15px;margin-bottom:6px;">'
+        f'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;">'
+        f'<div><span style="font-size:0.75rem;font-weight:600;color:#94a3b8;">{num} {label}</span>'
+        f'<span style="font-size:0.62rem;color:#334155;margin-left:10px;font-family:\'SF Mono\',monospace;">{formula}</span></div>'
+        f'<div style="text-align:right;">'
+        f'<span style="font-size:1.0rem;font-weight:700;color:{clr};">{sgn}{val/1e6:,.1f}M</span>'
+        f'<span style="font-size:0.65rem;color:{clr};opacity:0.8;margin-left:6px;">{pct:+.1f}%</span>'
+        f'</div></div>'
+        f'<div style="height:4px;background:rgba(255,255,255,0.05);border-radius:2px;">'
+        f'<div style="height:4px;width:{w:.1f}%;background:{clr};border-radius:2px;opacity:0.75;"></div>'
+        f'</div></div>'
+    )
+
+fx_display = 0.0 if all_krw else fx_v
 if is_model_A:
-    kpi_card(k4, "① 수량 차이", "(Q1−Q0)×P0_fx×ER0", qty_v)
-    kpi_card(k5, "② 단가 차이", "(P1−P0)×Q1×ER0", price_v)
-    if all_krw:
-        k6.markdown('<div class="kpi-card kpi-card-zero"><div class="kpi-label">③ 환율 차이</div><div class="kpi-formula">(ER1−ER0)×Q1×P1_fx</div><div class="kpi-value kpi-val-zero" style="font-size:1rem;letter-spacing:0;">KRW 해당없음</div></div>', unsafe_allow_html=True)
-    else:
-        kpi_card(k6, "③ 환율 차이", "(ER1−ER0)×Q1×P1_fx", fx_v)
+    rows_html = (
+        _factor_row("①", "수량 차이", "(Q1-Q0)xP0_fxxER0", qty_v) +
+        _factor_row("②", "단가 차이", "(P1-P0)xQ1xER0", price_v) +
+        _factor_row("③", "환율 차이", "KRW 해당없음" if all_krw else "(ER1-ER0)xQ1xP1_fx", fx_display)
+    )
 else:
-    kpi_card(k4, "① 수량 차이 (Volume Incremental)", "Q↑→×P1_krw / Q↓→×P0_krw", qty_v)
-    kpi_card(k5, "② 단가 차이 (Negotiation Residual)", "총차이 − ① − ③", price_v)
-    if all_krw:
-        k6.markdown('<div class="kpi-card kpi-card-zero"><div class="kpi-label">③ 환율 차이 (FX Exposure)</div><div class="kpi-formula">P/Q 방향 4-Case 분기</div><div class="kpi-value kpi-val-zero" style="font-size:1rem;letter-spacing:0;">KRW 해당없음</div></div>', unsafe_allow_html=True)
-    else:
-        kpi_card(k6, "③ 환율 차이 (FX Exposure)", "P/Q 방향 4-Case 분기", fx_v)
+    rows_html = (
+        _factor_row("①", "수량 차이 (Volume)", "Q+:xP1_krw / Q-:xP0_krw", qty_v) +
+        _factor_row("②", "단가 차이 (Residual)", "총차이-①-③", price_v) +
+        _factor_row("③", "환율 차이 (FX)", "KRW 해당없음" if all_krw else "4-Case", fx_display)
+    )
+st.markdown(rows_html, unsafe_allow_html=True)
+
+# ── AI 분석 제언 ──────────────────────────────────────────────────────────────
+st.markdown("<div style='height:10px'></div>", unsafe_allow_html=True)
+st.markdown(
+    '<div style="font-size:0.62rem;font-weight:600;color:#7c3aed;letter-spacing:0.1em;'
+    'text-transform:uppercase;padding:0 0 8px 10px;border-left:2px solid #7c3aed;'
+    'margin-bottom:10px;">AI 분석 제언</div>',
+    unsafe_allow_html=True
+)
+
+# 파라미터 변경 시 결과 초기화
+_ai_key = f"{base_label}|{curr_label}|{period_mode}|{analysis_model}|{','.join(sorted(selected_items[:15]))}"
+if st.session_state.get("_ai_param_key") != _ai_key:
+    st.session_state["_ai_param_key"] = _ai_key
+    st.session_state.pop("_ai_result", None)
+
+if st.button("✨ AI 분석 시작", key="btn_ai_analysis", type="primary"):
+    st.session_state.pop("_ai_result", None)
+    _grp_str  = ", ".join(selected_groups) if selected_groups else "전체"
+    _item_str = ", ".join(sorted(selected_items)[:20])
+    _prompt = (
+        "당신은 매출 차이 분석 전문 애널리스트입니다. 아래 데이터를 바탕으로 경영진을 위한 "
+        "간결하고 통찰력 있는 분석 제언을 한국어로 작성하세요.\n\n"
+        f"[분석 파라미터]\n"
+        f"- 비교 기간: {base_label} vs {curr_label}\n"
+        f"- 비교 방식: {period_mode}\n"
+        f"- 분석 모델: {analysis_model}\n"
+        f"- 분석 대상: {_grp_str}\n\n"
+        f"[분석 수치]\n"
+        f"- 기준 매출: {total_base:,.0f}원\n"
+        f"- 실적 매출: {total_curr:,.0f}원\n"
+        f"- 총 차이: {total_diff:+,.0f}원 ({growth_pct:+.1f}%)\n"
+        f"- 수량 차이: {qty_v:+,.0f}원 ({qty_pct:+.1f}%)\n"
+        f"- 단가 차이: {price_v:+,.0f}원 ({price_pct:+.1f}%)\n"
+        f"- 환율 차이: {fx_v:+,.0f}원 ({fx_pct:+.1f}%)\n"
+        f"- 품목: {_item_str}\n\n"
+        "아래 구조로 작성하세요:\n"
+        "**핵심 요약**: 가장 중요한 변화 한 문장\n"
+        "**주요 성과**: 긍정적인 부분 (2문장)\n"
+        "**주의 사항**: 우려되는 부분 (2문장)\n"
+        "**제언**: 구체적 액션 아이템 2개\n"
+    )
+    import requests as _req
+    with st.spinner("AI 분석 중..."):
+        try:
+            _resp = _req.post(
+                "https://api.anthropic.com/v1/messages",
+                headers={"Content-Type": "application/json"},
+                json={"model": "claude-sonnet-4-20250514", "max_tokens": 800,
+                      "messages": [{"role": "user", "content": _prompt}]},
+                timeout=60,
+            )
+            _data = _resp.json()
+            _text = "".join(b.get("text","") for b in _data.get("content",[]) if b.get("type")=="text")
+            st.session_state["_ai_result"] = _text if _text else "분석 결과를 받지 못했습니다."
+        except Exception as _e:
+            st.session_state["_ai_result"] = f"오류: {_e}"
+
+if "_ai_result" in st.session_state:
+    st.markdown(
+        f'<div style="background:rgba(124,58,237,0.06);border:1px solid rgba(124,58,237,0.2);'
+        f'border-radius:12px;padding:18px 22px;font-size:0.83rem;color:#cbd5e1;line-height:1.75;">'
+        f'{st.session_state["_ai_result"].replace(chr(10),"<br>")}'
+        f'</div>',
+        unsafe_allow_html=True
+    )
+else:
+    st.markdown(
+        '<div style="background:rgba(255,255,255,0.02);border:1px dashed rgba(124,58,237,0.2);'
+        'border-radius:12px;padding:20px;text-align:center;color:#334155;font-size:0.8rem;">'
+        'AI 분석 시작 버튼을 눌러 분석 결과를 확인하세요<br>'
+        '<span style="font-size:0.7rem;color:#1e293b;">파라미터(기간/모델/품목)가 변경되면 결과가 초기화됩니다</span></div>',
+        unsafe_allow_html=True
+    )
+
 
 # ==============================================================================
 # 커스텀 그룹별 차이 분석  (기본 분석 화면)
