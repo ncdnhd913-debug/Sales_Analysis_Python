@@ -44,40 +44,155 @@ st.set_page_config(
 # ── 글로벌 CSS ────────────────────────────────────────────────────────────────
 st.markdown("""
 <style>
+/* ── 기본 폰트 & 리셋 ── */
 html, body, [class*="css"] {
-    font-family: 'Malgun Gothic', 'AppleGothic', 'Noto Sans KR', sans-serif;
+    font-family: 'Pretendard', 'Noto Sans KR', 'Apple SD Gothic Neo', -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
 }
+
+/* ── 메인 타이틀 ── */
 .main-title {
-    font-size: 1.75rem; font-weight: 900; color: #1a6fd4;
-    letter-spacing: -0.5px; margin-bottom: 0.15rem;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #0f172a;
+    letter-spacing: -0.6px;
+    margin-bottom: 0.1rem;
 }
+.main-subtitle {
+    font-size: 0.82rem;
+    color: #94a3b8;
+    font-weight: 400;
+    margin-bottom: 1.2rem;
+}
+
+/* ── 섹션 헤더 — 미니멀 왼쪽 accent ── */
 .section-header {
-    font-size: 1.0rem; font-weight: 800;
-    background: linear-gradient(90deg, #2563eb 0%, #60a5fa 100%);
-    color: white; padding: 8px 16px; border-radius: 6px;
-    margin: 1.6rem 0 1rem 0; letter-spacing: 0.3px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #475569;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 0 0 8px 12px;
+    border-left: 3px solid #6366f1;
+    margin: 2rem 0 1rem 0;
+    background: none;
 }
-.kpi-card { border-radius:10px; padding:16px 20px; margin-bottom:8px; box-shadow:0 2px 8px rgba(0,0,0,0.08); }
-.kpi-card-neutral { background:#ffffff; border:1px solid #c8d6f0; border-top:4px solid #2d5faa; }
-.kpi-card-pos  { background:#f0faf4; border:1px solid #8ecba8; border-top:4px solid #1a7a4a; }
-.kpi-card-neg  { background:#fdf2f2; border:1px solid #e8a8a8; border-top:4px solid #c0392b; }
-.kpi-card-zero { background:#f7f8fa; border:1px solid #d0d5de; border-top:4px solid #8a95a8; }
-.kpi-label   { font-size:0.78rem; font-weight:700; color:#3a4a65; margin-bottom:3px; letter-spacing:0.2px; }
-.kpi-formula { font-size:0.67rem; color:#7a8aaa; margin-bottom:6px; font-family:'Courier New',monospace;
-               background:rgba(0,0,0,0.04); padding:2px 6px; border-radius:3px; display:inline-block; }
-.kpi-value   { font-size:1.35rem; font-weight:900; letter-spacing:-0.5px; margin-top:4px; }
-.kpi-val-neutral { color:#1e3a6e; }
-.kpi-val-pos     { color:#155d35; }
-.kpi-val-neg     { color:#9e1f1f; }
-.kpi-val-zero    { color:#6b7a95; }
-.period-badge { display:inline-block; border-radius:6px; padding:4px 12px; font-size:0.8rem; font-weight:700; margin:3px; }
-.badge-base { background:#1e3a6e; color:#ffffff; }
-.badge-curr { background:#1a7a4a; color:#ffffff; }
-div[data-testid="stDataFrame"] { width:100% !important; }
-div[data-testid="stDataFrame"] table { font-size:0.83rem !important; }
-div[data-testid="stDataFrame"] th {
-    background:#1e3a6e !important; color:white !important;
-    font-weight:700 !important; font-size:0.78rem !important;
+
+/* ── KPI 카드 — 미니멀 플랫 ── */
+.kpi-card {
+    border-radius: 12px;
+    padding: 18px 20px 16px;
+    margin-bottom: 8px;
+    border: 1px solid #f1f5f9;
+    background: #ffffff;
+    box-shadow: 0 1px 3px rgba(15,23,42,0.04), 0 1px 2px rgba(15,23,42,0.04);
+    transition: box-shadow 0.15s ease;
+}
+.kpi-card:hover {
+    box-shadow: 0 4px 12px rgba(15,23,42,0.08);
+}
+.kpi-card-neutral {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-top: 2px solid #6366f1;
+}
+.kpi-card-pos {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-top: 2px solid #10b981;
+}
+.kpi-card-neg {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-top: 2px solid #f43f5e;
+}
+.kpi-card-zero {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-top: 2px solid #cbd5e1;
+}
+
+.kpi-label {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: #94a3b8;
+    margin-bottom: 2px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+.kpi-formula {
+    font-size: 0.65rem;
+    color: #cbd5e1;
+    margin-bottom: 8px;
+    font-family: 'SF Mono', 'Fira Code', 'Courier New', monospace;
+    display: inline-block;
+}
+.kpi-value {
+    font-size: 1.45rem;
+    font-weight: 700;
+    letter-spacing: -0.8px;
+    margin-top: 2px;
+    line-height: 1.2;
+}
+.kpi-val-neutral { color: #1e293b; }
+.kpi-val-pos     { color: #059669; }
+.kpi-val-neg     { color: #e11d48; }
+.kpi-val-zero    { color: #94a3b8; }
+
+/* ── 기간 배지 ── */
+.period-badge {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 6px;
+    padding: 3px 10px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    margin: 2px 3px;
+    letter-spacing: 0.01em;
+}
+.badge-base {
+    background: #f1f5f9;
+    color: #475569;
+    border: 1px solid #e2e8f0;
+}
+.badge-curr {
+    background: #f0fdf4;
+    color: #15803d;
+    border: 1px solid #bbf7d0;
+}
+
+/* ── 데이터프레임 스타일 ── */
+div[data-testid="stDataFrame"] { width: 100% !important; }
+div[data-testid="stDataFrame"] table {
+    font-size: 0.82rem !important;
+    border-collapse: separate !important;
+    border-spacing: 0 !important;
+}
+div[data-testid="stDataFrame"] thead tr th {
+    background: #f8fafc !important;
+    color: #475569 !important;
+    font-weight: 600 !important;
+    font-size: 0.72rem !important;
+    letter-spacing: 0.04em !important;
+    text-transform: uppercase !important;
+    border-bottom: 1px solid #e2e8f0 !important;
+    padding: 8px 12px !important;
+}
+
+/* ── 분석 모델 카드 ── */
+.model-card-A {
+    background: #fafafa;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 14px 16px;
+    margin-bottom: 6px;
+}
+.model-card-B {
+    background: #fafafa;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 14px 16px;
+    margin-bottom: 6px;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -100,8 +215,10 @@ is_ytd         = ctx.get("is_ytd", False)
 # ══════════════════════════════════════════════════════════════════════════════
 # 타이틀
 # ══════════════════════════════════════════════════════════════════════════════
-st.markdown('<div class="main-title">📊 매출 차이 분석 (Variance Analysis)</div>',
-            unsafe_allow_html=True)
+st.markdown(
+    '<div class="main-title">매출 차이 분석</div>'
+    '<div class="main-subtitle">Variance Analysis Dashboard</div>',
+    unsafe_allow_html=True)
 
 if df_all is None:
     st.info("👈 왼쪽 사이드바에서 **ERP 매출실적 파일**을 업로드하세요.")
@@ -129,21 +246,31 @@ badge_bg     = "#eef4ff" if is_model_A else "#fff8ee"
 
 if is_model_A:
     st.markdown(f"""
-    <div style="background:{badge_bg};border-left:5px solid {accent_color};border-radius:8px;padding:10px 16px;margin-bottom:8px;">
-      <b style="color:{accent_color}">📐 모델 A — 원인별 임팩트 분석</b>&nbsp;&nbsp;
-      <span style="font-size:0.82rem;color:#555;">재무·감사용 표준 │ 변수 간 간섭 완전 제거</span><br/>
-      <span style="font-size:0.75rem;color:#888;margin-top:4px;display:block;">
-        ① (Q1−Q0)×<b>P0_fx</b>×<b>ER0</b> │ ② (P1−P0)×<b>Q1</b>×<b>ER0</b> │ ③ (ER1−ER0)×<b>Q1</b>×<b>P1_fx</b>
-      </span>
+    <div style="display:flex;align-items:center;gap:10px;background:#fafafa;border:1px solid #e2e8f0;
+                border-radius:10px;padding:10px 16px;margin-bottom:12px;">
+      <div style="width:6px;height:36px;background:#6366f1;border-radius:3px;flex-shrink:0;"></div>
+      <div>
+        <div style="font-size:0.82rem;font-weight:700;color:#1e293b;margin-bottom:2px;">모델 A — 원인별 임팩트 분석</div>
+        <div style="font-size:0.72rem;color:#94a3b8;font-family:'SF Mono','Fira Code',monospace;">
+          ① (Q1−Q0)×P0_fx×ER0 &nbsp;│&nbsp; ② (P1−P0)×Q1×ER0 &nbsp;│&nbsp; ③ (ER1−ER0)×Q1×P1_fx
+        </div>
+      </div>
+      <span style="margin-left:auto;font-size:0.68rem;font-weight:600;background:#eef2ff;color:#6366f1;
+                   border-radius:6px;padding:3px 10px;white-space:nowrap;">재무·감사 표준</span>
     </div>""", unsafe_allow_html=True)
 else:
     st.markdown(f"""
-    <div style="background:{badge_bg};border-left:5px solid {accent_color};border-radius:8px;padding:10px 16px;margin-bottom:8px;">
-      <b style="color:{accent_color}">📈 모델 B — 활동별 증분 분석</b>&nbsp;&nbsp;
-      <span style="font-size:0.82rem;color:#555;">영업·전략 보고용 │ 상황별 Case 분기</span><br/>
-      <span style="font-size:0.75rem;color:#888;margin-top:4px;display:block;">
-        ① Q↑:(Q1−Q0)×<b>P1_krw</b> / Q↓:(Q1−Q0)×<b>P0_krw</b> │ ② 총차이−①−③ │ ③ P/Q 4-Case
-      </span>
+    <div style="display:flex;align-items:center;gap:10px;background:#fafafa;border:1px solid #e2e8f0;
+                border-radius:10px;padding:10px 16px;margin-bottom:12px;">
+      <div style="width:6px;height:36px;background:#f97316;border-radius:3px;flex-shrink:0;"></div>
+      <div>
+        <div style="font-size:0.82rem;font-weight:700;color:#1e293b;margin-bottom:2px;">모델 B — 활동별 증분 분석</div>
+        <div style="font-size:0.72rem;color:#94a3b8;font-family:'SF Mono','Fira Code',monospace;">
+          ① Q↑×P1_krw / Q↓×P0_krw &nbsp;│&nbsp; ② 총차이−①−③ &nbsp;│&nbsp; ③ P/Q 4-Case
+        </div>
+      </div>
+      <span style="margin-left:auto;font-size:0.68rem;font-weight:600;background:#fff7ed;color:#ea580c;
+                   border-radius:6px;padding:3px 10px;white-space:nowrap;">영업·전략 보고</span>
     </div>""", unsafe_allow_html=True)
 
 # ── 기간 유효성 ───────────────────────────────────────────────────────────────
@@ -259,24 +386,24 @@ sign_td = "+" if total_diff > 0 else ""
 card_td = "kpi-card-pos" if total_diff > 0 else ("kpi-card-neg" if total_diff < 0 else "kpi-card-zero")
 val_td  = "kpi-val-pos"  if total_diff > 0 else ("kpi-val-neg"  if total_diff < 0 else "kpi-val-zero")
 k3.markdown(f"""
-<div class="kpi-card {card_td}" style="border-top-width:5px;">
-    <div class="kpi-label">▶ 총 차이 (실적 − 기준)</div>
-    <div class="kpi-formula">①수량 + ②단가 + ③환율</div>
-    <div class="kpi-value {val_td}" style="font-size:1.5rem;">{sign_td}{total_diff:,.0f} 원</div>
+<div class="kpi-card {card_td}">
+    <div class="kpi-label">총 차이 <span style="font-size:0.62rem;color:#cbd5e1;">①+②+③</span></div>
+    <div class="kpi-formula">실적 − 기준</div>
+    <div class="kpi-value {val_td}" style="font-size:1.55rem;">{sign_td}{total_diff:,.0f}<span style="font-size:0.8rem;opacity:0.6;margin-left:3px;">원</span></div>
 </div>""", unsafe_allow_html=True)
 
 if is_model_A:
     kpi_card(k4, "① 수량 차이", "(Q1−Q0)×P0_fx×ER0", qty_v)
     kpi_card(k5, "② 단가 차이", "(P1−P0)×Q1×ER0", price_v)
     if all_krw:
-        k6.markdown('<div class="kpi-card kpi-card-zero"><div class="kpi-label">③ 환율 차이</div><div class="kpi-formula">(ER1−ER0)×Q1×P1_fx</div><div class="kpi-value kpi-val-zero">— KRW 해당없음</div></div>', unsafe_allow_html=True)
+        k6.markdown('<div class="kpi-card kpi-card-zero"><div class="kpi-label">③ 환율 차이</div><div class="kpi-formula">(ER1−ER0)×Q1×P1_fx</div><div class="kpi-value kpi-val-zero" style="font-size:0.95rem;letter-spacing:0;">KRW 해당없음</div></div>', unsafe_allow_html=True)
     else:
         kpi_card(k6, "③ 환율 차이", "(ER1−ER0)×Q1×P1_fx", fx_v)
 else:
     kpi_card(k4, "① 수량 차이 (Volume Incremental)", "Q↑→×P1_krw / Q↓→×P0_krw", qty_v)
     kpi_card(k5, "② 단가 차이 (Negotiation Residual)", "총차이 − ① − ③", price_v)
     if all_krw:
-        k6.markdown('<div class="kpi-card kpi-card-zero"><div class="kpi-label">③ 환율 차이 (FX Exposure)</div><div class="kpi-formula">P/Q 방향 4-Case 분기</div><div class="kpi-value kpi-val-zero">— KRW 해당없음</div></div>', unsafe_allow_html=True)
+        k6.markdown('<div class="kpi-card kpi-card-zero"><div class="kpi-label">③ 환율 차이 (FX Exposure)</div><div class="kpi-formula">P/Q 방향 4-Case 분기</div><div class="kpi-value kpi-val-zero" style="font-size:0.95rem;letter-spacing:0;">KRW 해당없음</div></div>', unsafe_allow_html=True)
     else:
         kpi_card(k6, "③ 환율 차이 (FX Exposure)", "P/Q 방향 4-Case 분기", fx_v)
 
