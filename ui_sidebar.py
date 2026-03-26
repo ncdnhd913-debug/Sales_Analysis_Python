@@ -139,16 +139,16 @@ def render_sidebar():
 
 def _render_model_cards(is_A_active: bool):
     if is_A_active:
-        card_s = "background:#eef2ff;border:1.5px solid #c7d2fe;border-radius:10px;padding:12px 14px;margin-bottom:4px;"
-        title_s = "font-size:0.84rem;font-weight:700;color:#4338ca;"
-        desc_s = "font-size:0.73rem;color:#6366f1;margin-top:4px;line-height:1.55;opacity:0.85;"
-        tag_s = "display:inline-block;font-size:0.66rem;font-weight:600;border-radius:4px;padding:2px 8px;margin-top:6px;background:#6366f1;color:white;"
+        card_s = "background:#1e3a6e;border:2px solid #1e3a6e;border-radius:10px;padding:13px 15px;margin-bottom:4px;"
+        title_s = "font-size:0.9rem;font-weight:800;color:#ffffff;"
+        desc_s = "font-size:0.76rem;color:#c8dcff;margin-top:5px;line-height:1.6;"
+        tag_s = "display:inline-block;font-size:0.69rem;font-weight:700;border-radius:4px;padding:2px 8px;margin-top:7px;background:#ffffff;color:#1e3a6e;"
         btn_lbl = "✔ 선택됨 (모델 A)"
     else:
-        card_s = "background:#fafafa;border:1px solid #e2e8f0;border-radius:10px;padding:12px 14px;margin-bottom:4px;"
-        title_s = "font-size:0.84rem;font-weight:600;color:#64748b;"
-        desc_s = "font-size:0.73rem;color:#94a3b8;margin-top:4px;line-height:1.55;"
-        tag_s = "display:inline-block;font-size:0.66rem;font-weight:600;border-radius:4px;padding:2px 8px;margin-top:6px;background:#e2e8f0;color:#64748b;"
+        card_s = "background:#dde8ff;border:2px solid #2d5faa;border-radius:10px;padding:13px 15px;margin-bottom:4px;"
+        title_s = "font-size:0.9rem;font-weight:800;color:#0d2050;"
+        desc_s = "font-size:0.76rem;color:#1a2d50;margin-top:5px;line-height:1.6;"
+        tag_s = "display:inline-block;font-size:0.69rem;font-weight:700;border-radius:4px;padding:2px 8px;margin-top:7px;background:#1e3a6e;color:#ffffff;"
         btn_lbl = "이 모델 선택 →"
 
     badge_a = '&nbsp;<span style="font-size:0.75rem;background:#27ae60;color:white;border-radius:3px;padding:1px 7px;">선택중</span>' if is_A_active else ''
@@ -172,16 +172,16 @@ def _render_model_cards(is_A_active: bool):
     st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
 
     if not is_A_active:
-        card_s = "background:#fff7ed;border:1.5px solid #fed7aa;border-radius:10px;padding:12px 14px;margin-bottom:4px;"
-        title_s = "font-size:0.84rem;font-weight:700;color:#c2410c;"
-        desc_s = "font-size:0.73rem;color:#f97316;margin-top:4px;line-height:1.55;opacity:0.85;"
-        tag_s = "display:inline-block;font-size:0.66rem;font-weight:600;border-radius:4px;padding:2px 8px;margin-top:6px;background:#f97316;color:white;"
+        card_s = "background:#7a3300;border:2px solid #7a3300;border-radius:10px;padding:13px 15px;margin-bottom:4px;"
+        title_s = "font-size:0.9rem;font-weight:800;color:#ffffff;"
+        desc_s = "font-size:0.76rem;color:#ffd8b0;margin-top:5px;line-height:1.6;"
+        tag_s = "display:inline-block;font-size:0.69rem;font-weight:700;border-radius:4px;padding:2px 8px;margin-top:7px;background:#ffffff;color:#7a3300;"
         btn_lbl = "✔ 선택됨 (모델 B)"
     else:
-        card_s = "background:#fafafa;border:1px solid #e2e8f0;border-radius:10px;padding:12px 14px;margin-bottom:4px;"
-        title_s = "font-size:0.84rem;font-weight:600;color:#64748b;"
-        desc_s = "font-size:0.73rem;color:#94a3b8;margin-top:4px;line-height:1.55;"
-        tag_s = "display:inline-block;font-size:0.66rem;font-weight:600;border-radius:4px;padding:2px 8px;margin-top:6px;background:#e2e8f0;color:#64748b;"
+        card_s = "background:#ffe0c0;border:2px solid #c9641a;border-radius:10px;padding:13px 15px;margin-bottom:4px;"
+        title_s = "font-size:0.9rem;font-weight:800;color:#5a1800;"
+        desc_s = "font-size:0.76rem;color:#4a1800;margin-top:5px;line-height:1.6;"
+        tag_s = "display:inline-block;font-size:0.69rem;font-weight:700;border-radius:4px;padding:2px 8px;margin-top:7px;background:#7a3300;color:#ffffff;"
         btn_lbl = "이 모델 선택 →"
 
     badge_b = '&nbsp;<span style="font-size:0.75rem;background:#27ae60;color:white;border-radius:3px;padding:1px 7px;">선택중</span>' if not is_A_active else ''
