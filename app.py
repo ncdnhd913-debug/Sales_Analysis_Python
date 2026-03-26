@@ -668,9 +668,7 @@ st.markdown(rows_html, unsafe_allow_html=True)
 # ── AI 분석 제언 ──────────────────────────────────────────────────────────────
 st.markdown("<div style='height:10px'></div>", unsafe_allow_html=True)
 st.markdown(
-    '<div style="font-size:0.62rem;font-weight:600;color:#7c3aed;letter-spacing:0.1em;'
-    'text-transform:uppercase;padding:0 0 8px 10px;border-left:2px solid #7c3aed;'
-    'margin-bottom:10px;">AI 분석 제언</div>',
+    '<div class="section-header">🤖 AI 분석 제언</div>',
     unsafe_allow_html=True
 )
 
@@ -706,21 +704,39 @@ if st.button("✨ AI 분석 시작", key="btn_ai_analysis", type="primary"):
         "**주의 사항**: 우려되는 부분 (2문장)\n"
         "**제언**: 구체적 액션 아이템 2개\n"
     )
+    # API 키: Streamlit Cloud → Settings → Secrets → [anthropic] api_key = "sk-ant-..."
+    import os as _os
+    _api_key = (st.secrets.get("anthropic", {}).get("api_key", "")
+               or _os.environ.get("ANTHROPIC_API_KEY", ""))
     import requests as _req
-    with st.spinner("AI 분석 중..."):
-        try:
-            _resp = _req.post(
-                "https://api.anthropic.com/v1/messages",
-                headers={"Content-Type": "application/json"},
-                json={"model": "claude-sonnet-4-20250514", "max_tokens": 800,
-                      "messages": [{"role": "user", "content": _prompt}]},
-                timeout=60,
-            )
-            _data = _resp.json()
-            _text = "".join(b.get("text","") for b in _data.get("content",[]) if b.get("type")=="text")
-            st.session_state["_ai_result"] = _text if _text else "분석 결과를 받지 못했습니다."
-        except Exception as _e:
-            st.session_state["_ai_result"] = f"오류: {_e}"
+    if not _api_key:
+        st.session_state["_ai_result"] = ("⚠️ API 키 미설정\n"
+            "Streamlit Cloud → Settings → Secrets 에 추가:\n\n"
+            "[anthropic]\napi_key = \"sk-ant-api03-...\"\n")
+    else:
+        with st.spinner("AI 분석 중..."):
+            try:
+                _resp = _req.post(
+                    "https://api.anthropic.com/v1/messages",
+                    headers={
+                        "Content-Type": "application/json",
+                        "x-api-key": _api_key,
+                        "anthropic-version": "2023-06-01",
+                    },
+                    json={"model": "claude-sonnet-4-20250514", "max_tokens": 800,
+                          "messages": [{"role": "user", "content": _prompt}]},
+                    timeout=60,
+                )
+                _data = _resp.json()
+                if "error" in _data:
+                    raise Exception(_data["error"].get("message", str(_data["error"])))
+                _text = "".join(
+                    b.get("text","") for b in _data.get("content",[])
+                    if b.get("type") == "text"
+                )
+                st.session_state["_ai_result"] = _text if _text else "분석 결과를 받지 못했습니다."
+            except Exception as _e:
+                st.session_state["_ai_result"] = f"⚠️ 오류: {_e}"
 
 if "_ai_result" in st.session_state:
     st.markdown(
