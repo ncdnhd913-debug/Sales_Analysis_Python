@@ -58,32 +58,42 @@ def kpi_card(col, label: str, formula: str, value: float, neutral: bool = False)
 def render_waterfall(
     total_base: float, qty_v: float, price_v: float, fx_v: float,
     total_curr: float, base_label: str, curr_label: str, accent: str,
+    unit: str = "백만원",
 ):
-    """Waterfall 차트(plotly) Figure 반환. Y축은 백만원 단위."""
+    """Waterfall 차트 반환. unit: 백만원 or 원"""
     import plotly.graph_objects as go
 
     CLR_BASE = "#6366f1"
-    CLR_CURR = "#0ea5e9"
-    CLR_UP   = "#10b981"
-    CLR_DOWN = "#f43f5e"
-    CLR_CONN = "#e2e8f0"
-    M = 1_000_000
+    CLR_CURR = "#38bdf8"
+    CLR_UP   = "#34d399"
+    CLR_DOWN = "#f87171"
+    CLR_CONN = "rgba(124,58,237,0.4)"
+
+    use_M = (unit == "백만원")
+    DIV   = 1_000_000 if use_M else 1
+    sfx   = "M" if use_M else ""
 
     def bar_color(v): return CLR_UP if v >= 0 else CLR_DOWN
     def fmt_diff(v):
-        mv = v / M
-        if v > 0: return f"▲ +{mv:,.1f}"
-        if v < 0: return f"▼ {mv:,.1f}"
-        return f"{mv:,.1f}"
+        mv = v / DIV
+        fmt = f"{mv:,.1f}" if use_M else f"{mv:,.0f}"
+        if v > 0: return f"▲ +{fmt}"
+        if v < 0: return f"▼ {fmt}"
+        return fmt
 
     x_labels   = [f"<b>기준 매출</b><br><sub>({base_label})</sub>",
                   "<b>① 수량 차이</b>", "<b>② 단가 차이</b>", "<b>③ 환율 차이</b>",
                   f"<b>실적 매출</b><br><sub>({curr_label})</sub>"]
-    text_labels = [f"{total_base/M:,.1f}", fmt_diff(qty_v), fmt_diff(price_v),
-                   fmt_diff(fx_v), f"{total_curr/M:,.1f}"]
 
-    _b = total_base / M; _q = qty_v / M; _p = price_v / M
-    _f = fx_v / M;       _c = total_curr / M
+    _b = total_base / DIV; _q = qty_v / DIV; _p = price_v / DIV
+    _f = fx_v / DIV;       _c = total_curr / DIV
+
+    text_labels = [
+        f"{_b:,.1f}" if use_M else f"{_b:,.0f}",
+        fmt_diff(qty_v), fmt_diff(price_v), fmt_diff(fx_v),
+        f"{_c:,.1f}" if use_M else f"{_c:,.0f}",
+    ]
+
     running   = [0, _b, _b+_q, _b+_q+_p]
     bar_vals  = [_b, _q, _p, _f, _c]
     bar_bases = [0, running[1], running[2], running[3], 0]
@@ -114,16 +124,18 @@ def render_waterfall(
     diff_val  = total_curr - total_base
     diff_sign = "▲ +" if diff_val >= 0 else "▼ "
     diff_pct  = f"({diff_val/total_base*100:+.1f}%)" if total_base != 0 else ""
-    diff_m    = diff_val / M
+    diff_d    = diff_val / DIV
+    diff_fmt  = f"{diff_d:,.1f}" if use_M else f"{diff_d:,.0f}"
+    unit_lbl  = "백만원" if use_M else "원"
     fig.update_layout(
-        title_text=f"{base_label} → {curr_label}  ·  총차이 {diff_sign}{diff_m:,.1f}백만원 {diff_pct}",
+        title_text=f"{base_label} → {curr_label}  ·  총차이 {diff_sign}{diff_fmt}{unit_lbl} {diff_pct}",
         title_font=dict(size=13, color="#94a3b8", family="Inter, Noto Sans KR, sans-serif"),
         title_x=0.01,
         barmode="stack",
         height=460,
         margin=dict(t=60, b=40, l=50, r=50),
-        plot_bgcolor="#0f0f1e",
-        paper_bgcolor="#0f0f1e",
+        plot_bgcolor="#0d0d1f",
+        paper_bgcolor="#0d0d1f",
         showlegend=False,
         font=dict(family="Inter, Noto Sans KR, sans-serif", size=12, color="#94a3b8"),
         xaxis=dict(
@@ -134,10 +146,10 @@ def render_waterfall(
             zeroline=False,
         ),
         yaxis=dict(
-            title="백만원",
+            title=unit_lbl,
             title_font=dict(size=10, color="#475569"),
             tickfont=dict(size=10, color="#475569", family="Inter, sans-serif"),
-            ticksuffix="M",
+            ticksuffix=sfx,
             gridcolor="rgba(124,58,237,0.15)",
             gridwidth=1,
             zeroline=True,
