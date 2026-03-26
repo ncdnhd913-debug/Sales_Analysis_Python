@@ -465,96 +465,67 @@ group_names = list(groups.keys())
 st.markdown('<div class="section-header">📦 분석 대상 선택</div>', unsafe_allow_html=True)
 
 if has_custom:
-    # ── 커스텀 그룹이 있는 경우: 드롭박스 + 체크박스 융합 UI ─────────────────
-    if "ms_groups" not in st.session_state:
-        st.session_state["ms_groups"] = list(custom_group_names)
-
-    st.session_state["ms_groups"] = [
-        g for g in st.session_state["ms_groups"] if g in group_names
-    ]
+    # ── 커스텀 그룹 체크박스 key 초기화 (최초 1회 + 새 그룹 자동 추가) ────────
     if "known_custom_groups" not in st.session_state:
         st.session_state["known_custom_groups"] = set()
-    truly_new = [g for g in custom_group_names
-                 if g not in st.session_state["known_custom_groups"]]
-    for g in truly_new:
-        if g not in st.session_state["ms_groups"]:
-            st.session_state["ms_groups"].append(g)
-    st.session_state["known_custom_groups"] = set(custom_group_names)
+    for gn in group_names:
+        ck = f"chk_grp_{gn}"
+        if ck not in st.session_state:
+            # 신규 그룹은 기본 체크
+            st.session_state[ck] = True
+    # 사라진 그룹의 키 정리
+    for old_gn in list(st.session_state["known_custom_groups"]):
+        if old_gn not in group_names:
+            st.session_state.pop(f"chk_grp_{old_gn}", None)
+    st.session_state["known_custom_groups"] = set(group_names)
 
-    # ── 드롭박스: 그룹 선택 ──────────────────────────────────────────────────
-    with st.expander(
-        f"📦 그룹 선택 — {len(st.session_state['ms_groups'])}개 선택됨  ▾",
-        expanded=False,
-    ):
+    # ── 전체 선택/해제 버튼 ──────────────────────────────────────────────────
+    _sel_cnt = sum(1 for gn in group_names if st.session_state.get(f"chk_grp_{gn}", True))
+    with st.expander(f"📦 그룹 선택 — {_sel_cnt} / {len(group_names)}개  ▾", expanded=False):
         _c1, _c2 = st.columns(2)
         with _c1:
             if st.button("전체 선택", key="sel_all_grp", use_container_width=True):
-                st.session_state["ms_groups"] = list(custom_group_names)
+                for gn in group_names:
+                    st.session_state[f"chk_grp_{gn}"] = True
                 st.rerun()
         with _c2:
             if st.button("전체 해제", key="sel_none_grp", use_container_width=True):
-                st.session_state["ms_groups"] = []
+                for gn in group_names:
+                    st.session_state[f"chk_grp_{gn}"] = False
                 st.rerun()
-
         st.markdown("<div style='height:4px'></div>", unsafe_allow_html=True)
-
         for gi, gn in enumerate(group_names):
-            clr = GROUP_COLORS[gi % len(GROUP_COLORS)][0]
-            checked = gn in st.session_state["ms_groups"]
-            new_val = st.checkbox(
-                gn,
-                value=checked,
-                key=f"chk_grp_{gn}",
-            )
-            if new_val != checked:
-                if new_val:
-                    if gn not in st.session_state["ms_groups"]:
-                        st.session_state["ms_groups"].append(gn)
-                else:
-                    st.session_state["ms_groups"] = [
-                        x for x in st.session_state["ms_groups"] if x != gn
-                    ]
-                st.rerun()
+            # key만 사용, value= 미사용 → 무한루프 완전 차단
+            st.checkbox(gn, key=f"chk_grp_{gn}")
 
-    selected_groups = [g for g in st.session_state["ms_groups"] if g in group_names]
-    selected_items = [
-        item for gn in selected_groups for item in groups.get(gn, [])
-    ]
+    selected_groups = [gn for gn in group_names if st.session_state.get(f"chk_grp_{gn}", True)]
+    selected_items  = [item for gn in selected_groups for item in groups.get(gn, [])]
+
 else:
-    # ── 커스텀 그룹 없는 경우: 드롭박스 + 체크박스 융합 (품목 단위) ───────────
-    if "ms_items_state" not in st.session_state:
-        st.session_state["ms_items_state"] = list(all_items)
+    # ── 커스텀 그룹 없는 경우: 품목 체크박스 ────────────────────────────────
+    for item in all_items:
+        ck = f"chk_item_{item}"
+        if ck not in st.session_state:
+            st.session_state[ck] = True
 
-    with st.expander(
-        f"📋 품목 선택 — {len(st.session_state['ms_items_state'])}개 선택됨  ▾",
-        expanded=False,
-    ):
+    _sel_cnt2 = sum(1 for i in all_items if st.session_state.get(f"chk_item_{i}", True))
+    with st.expander(f"📋 품목 선택 — {_sel_cnt2} / {len(all_items)}개  ▾", expanded=False):
         _c1, _c2 = st.columns(2)
         with _c1:
             if st.button("전체 선택", key="sel_all_items", use_container_width=True):
-                st.session_state["ms_items_state"] = list(all_items)
+                for item in all_items:
+                    st.session_state[f"chk_item_{item}"] = True
                 st.rerun()
         with _c2:
             if st.button("전체 해제", key="sel_none_items", use_container_width=True):
-                st.session_state["ms_items_state"] = []
+                for item in all_items:
+                    st.session_state[f"chk_item_{item}"] = False
                 st.rerun()
-
         st.markdown("<div style='height:4px'></div>", unsafe_allow_html=True)
-
         for item in all_items:
-            checked = item in st.session_state["ms_items_state"]
-            new_val = st.checkbox(item, value=checked, key=f"chk_item_{item}")
-            if new_val != checked:
-                if new_val:
-                    if item not in st.session_state["ms_items_state"]:
-                        st.session_state["ms_items_state"].append(item)
-                else:
-                    st.session_state["ms_items_state"] = [
-                        x for x in st.session_state["ms_items_state"] if x != item
-                    ]
-                st.rerun()
+            st.checkbox(item, key=f"chk_item_{item}")
 
-    selected_items = [i for i in st.session_state["ms_items_state"] if i in all_items]
+    selected_items  = [i for i in all_items if st.session_state.get(f"chk_item_{i}", True)]
     selected_groups = []
 
 if not selected_items:
