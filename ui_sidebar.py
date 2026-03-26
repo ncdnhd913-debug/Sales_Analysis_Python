@@ -33,7 +33,7 @@ def render_sidebar():
     df_all = None
 
     with st.sidebar:
-        st.markdown("## 📂 파일 업로드")
+        st.markdown("#### 📂 파일 업로드")
         uploaded = st.file_uploader("ERP 매출실적 (.xlsx / .xls)", type=["xlsx", "xls"])
 
 
@@ -65,8 +65,8 @@ def render_sidebar():
 
             if is_ytd:
                 ytd_months = list(range(1, curr_month + 1))
-                base_label = f"{base_year}년 1~{MONTH_KR[curr_month]} 누적"
-                curr_label = f"{curr_year}년 1~{MONTH_KR[curr_month]} 누적"
+                base_label = f"{base_year}년 1~{curr_month}월 누적"
+                curr_label = f"{curr_year}년 1~{curr_month}월 누적"
             else:
                 base_label = f"{base_year}년 {MONTH_KR[base_month]}"
                 curr_label = f"{curr_year}년 {MONTH_KR[curr_month]}"
@@ -116,16 +116,16 @@ def render_sidebar():
 
 def _render_model_cards(is_A_active: bool):
     if is_A_active:
-        card_s = "background:#1e3a6e;border:2px solid #1e3a6e;border-radius:10px;padding:13px 15px;margin-bottom:4px;"
-        title_s = "font-size:0.9rem;font-weight:800;color:#ffffff;"
-        desc_s = "font-size:0.76rem;color:#c8dcff;margin-top:5px;line-height:1.6;"
-        tag_s = "display:inline-block;font-size:0.69rem;font-weight:700;border-radius:4px;padding:2px 8px;margin-top:7px;background:#ffffff;color:#1e3a6e;"
+        card_s = "background:rgba(124,58,237,0.18);border:1.5px solid rgba(124,58,237,0.5);border-radius:10px;padding:12px 14px;margin-bottom:4px;box-shadow:0 0 16px rgba(124,58,237,0.15);"
+        title_s = "font-size:0.84rem;font-weight:600;color:#c4b5fd;"
+        desc_s = "font-size:0.72rem;color:#8b5cf6;margin-top:4px;line-height:1.55;"
+        tag_s = "display:inline-block;font-size:0.63rem;font-weight:600;border-radius:4px;padding:2px 8px;margin-top:6px;background:rgba(124,58,237,0.25);color:#a78bfa;border:1px solid rgba(124,58,237,0.4);"
         btn_lbl = "✔ 선택됨 (모델 A)"
     else:
-        card_s = "background:#dde8ff;border:2px solid #2d5faa;border-radius:10px;padding:13px 15px;margin-bottom:4px;"
-        title_s = "font-size:0.9rem;font-weight:800;color:#0d2050;"
-        desc_s = "font-size:0.76rem;color:#1a2d50;margin-top:5px;line-height:1.6;"
-        tag_s = "display:inline-block;font-size:0.69rem;font-weight:700;border-radius:4px;padding:2px 8px;margin-top:7px;background:#1e3a6e;color:#ffffff;"
+        card_s = "background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:12px 14px;margin-bottom:4px;"
+        title_s = "font-size:0.84rem;font-weight:500;color:#64748b;"
+        desc_s = "font-size:0.72rem;color:#475569;margin-top:4px;line-height:1.55;"
+        tag_s = "display:inline-block;font-size:0.63rem;font-weight:500;border-radius:4px;padding:2px 8px;margin-top:6px;background:rgba(255,255,255,0.05);color:#64748b;border:1px solid rgba(255,255,255,0.1);"
         btn_lbl = "이 모델 선택 →"
 
     badge_a = '&nbsp;<span style="font-size:0.75rem;background:#27ae60;color:white;border-radius:3px;padding:1px 7px;">선택중</span>' if is_A_active else ''
@@ -149,16 +149,16 @@ def _render_model_cards(is_A_active: bool):
     st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
 
     if not is_A_active:
-        card_s = "background:#7a3300;border:2px solid #7a3300;border-radius:10px;padding:13px 15px;margin-bottom:4px;"
-        title_s = "font-size:0.9rem;font-weight:800;color:#ffffff;"
-        desc_s = "font-size:0.76rem;color:#ffd8b0;margin-top:5px;line-height:1.6;"
-        tag_s = "display:inline-block;font-size:0.69rem;font-weight:700;border-radius:4px;padding:2px 8px;margin-top:7px;background:#ffffff;color:#7a3300;"
+        card_s = "background:rgba(249,115,22,0.12);border:1.5px solid rgba(249,115,22,0.4);border-radius:10px;padding:12px 14px;margin-bottom:4px;box-shadow:0 0 16px rgba(249,115,22,0.1);"
+        title_s = "font-size:0.84rem;font-weight:600;color:#fdba74;"
+        desc_s = "font-size:0.72rem;color:#f97316;margin-top:4px;line-height:1.55;"
+        tag_s = "display:inline-block;font-size:0.63rem;font-weight:600;border-radius:4px;padding:2px 8px;margin-top:6px;background:rgba(249,115,22,0.2);color:#fb923c;border:1px solid rgba(249,115,22,0.35);"
         btn_lbl = "✔ 선택됨 (모델 B)"
     else:
-        card_s = "background:#ffe0c0;border:2px solid #c9641a;border-radius:10px;padding:13px 15px;margin-bottom:4px;"
-        title_s = "font-size:0.9rem;font-weight:800;color:#5a1800;"
-        desc_s = "font-size:0.76rem;color:#4a1800;margin-top:5px;line-height:1.6;"
-        tag_s = "display:inline-block;font-size:0.69rem;font-weight:700;border-radius:4px;padding:2px 8px;margin-top:7px;background:#7a3300;color:#ffffff;"
+        card_s = "background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:12px 14px;margin-bottom:4px;"
+        title_s = "font-size:0.84rem;font-weight:500;color:#64748b;"
+        desc_s = "font-size:0.72rem;color:#475569;margin-top:4px;line-height:1.55;"
+        tag_s = "display:inline-block;font-size:0.63rem;font-weight:500;border-radius:4px;padding:2px 8px;margin-top:6px;background:rgba(255,255,255,0.05);color:#64748b;border:1px solid rgba(255,255,255,0.1);"
         btn_lbl = "이 모델 선택 →"
 
     badge_b = '&nbsp;<span style="font-size:0.75rem;background:#27ae60;color:white;border-radius:3px;padding:1px 7px;">선택중</span>' if not is_A_active else ''
