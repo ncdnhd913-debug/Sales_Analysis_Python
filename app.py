@@ -46,257 +46,174 @@ st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+KR:wght@400;500;600;700&display=swap');
 
-/* ━━━ 라이트 모드 강제 ━━━ */
-html, body { color-scheme: light !important; }
-.stApp, [data-testid="stAppViewContainer"],
-[data-testid="stAppViewContainer"] > section,
-.main, .block-container, .element-container,
-[data-testid="stVerticalBlock"] {
-    background-color: #ffffff !important;
-    color: #1e293b !important;
-}
-[data-testid="stSidebar"],
-[data-testid="stSidebar"] > div:first-child {
-    background-color: #f8fafc !important;
-    border-right: 1px solid #e2e8f0 !important;
+/* 폰트 */
+html, body, [class*="css"] {
+    font-family: 'Inter', 'Noto Sans KR', -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
 }
 
-/* ━━━ 폰트 ━━━ */
-html, body, *, button, input, select, textarea {
-    font-family: 'Inter', 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif !important;
-    -webkit-font-smoothing: antialiased !important;
-}
+/* Streamlit 기본 불필요 UI 제거 */
+#MainMenu { visibility: hidden; }
+footer    { visibility: hidden; }
+header    { visibility: hidden; }
 
-/* ━━━ Streamlit 기본 요소 제거 ━━━ */
-#MainMenu, footer, header, [data-testid="stToolbar"],
-[data-testid="stDecoration"], [data-testid="stStatusWidget"] {
-    display: none !important;
-}
-
-/* ━━━ 컨텐츠 영역 ━━━ */
+/* 메인 컨텐츠 여백 */
 .block-container {
-    padding-top: 2rem !important;
-    padding-bottom: 3rem !important;
+    padding-top: 1.8rem;
+    padding-bottom: 2.5rem;
 }
 
-/* ━━━ 버튼 — 가능한 모든 선택자 ━━━ */
-button:not([title="View fullscreen"]):not([aria-label="Close"]) {
-    background-color: #f8fafc !important;
-    color: #475569 !important;
-    border: 1px solid #e2e8f0 !important;
-    border-radius: 8px !important;
-    font-size: 0.8rem !important;
-    font-weight: 500 !important;
-    box-shadow: 0 1px 2px rgba(15,23,42,0.05) !important;
-    transition: all 0.15s ease !important;
-    cursor: pointer !important;
+/* 버튼 — 기본 secondary */
+.stButton > button {
+    border-radius: 8px;
+    font-size: 0.82rem;
+    font-weight: 500;
+    border: 1px solid #e2e8f0;
+    background-color: #f8fafc;
+    color: #475569;
+    box-shadow: 0 1px 2px rgba(15,23,42,0.05);
+    transition: all 0.15s ease;
+    padding: 5px 14px;
 }
-button:not([title="View fullscreen"]):not([aria-label="Close"]):hover {
-    background-color: #f5f3ff !important;
-    border-color: #6366f1 !important;
-    color: #6366f1 !important;
-    box-shadow: 0 0 0 3px rgba(99,102,241,0.1) !important;
+.stButton > button:hover {
+    border-color: #6366f1;
+    color: #6366f1;
+    background-color: #f5f3ff;
+    box-shadow: 0 0 0 3px rgba(99,102,241,0.1);
 }
-/* Primary 버튼 (kind="primary") */
-[data-testid="baseButton-primary"],
-button[kind="primary"],
-.stButton button[kind="primary"] {
-    background-color: #6366f1 !important;
-    border-color: #6366f1 !important;
-    color: #ffffff !important;
-    box-shadow: 0 2px 4px rgba(99,102,241,0.3) !important;
+/* Primary 버튼 */
+.stButton > button[kind="primary"] {
+    background-color: #6366f1;
+    border-color: #6366f1;
+    color: #ffffff;
+    box-shadow: 0 1px 3px rgba(99,102,241,0.3);
 }
-[data-testid="baseButton-primary"]:hover,
-button[kind="primary"]:hover {
-    background-color: #4f46e5 !important;
-    border-color: #4f46e5 !important;
-    box-shadow: 0 4px 12px rgba(99,102,241,0.4) !important;
-    color: #ffffff !important;
+.stButton > button[kind="primary"]:hover {
+    background-color: #4f46e5;
+    border-color: #4f46e5;
+    box-shadow: 0 4px 12px rgba(99,102,241,0.35);
 }
 
-/* ━━━ 입력 필드 ━━━ */
-input, textarea,
-[data-baseweb="select"] > div,
-[data-baseweb="input"] > div {
-    background-color: #ffffff !important;
-    border-color: #e2e8f0 !important;
-    border-radius: 8px !important;
-    color: #1e293b !important;
-    font-size: 0.82rem !important;
+/* 탭 */
+.stTabs [data-baseweb="tab-list"] {
+    gap: 0;
+    border-bottom: 1.5px solid #e2e8f0;
 }
-[data-baseweb="select"] > div:focus-within,
-[data-baseweb="input"] > div:focus-within {
-    border-color: #6366f1 !important;
-    box-shadow: 0 0 0 3px rgba(99,102,241,0.12) !important;
+.stTabs [data-baseweb="tab"] {
+    border-radius: 6px 6px 0 0;
+    font-size: 0.8rem;
+    font-weight: 500;
+    padding: 7px 18px;
+    color: #94a3b8;
+    background: transparent;
+    border: none;
 }
-
-/* ━━━ 파일 업로더 영역 ━━━ */
-[data-testid="stFileUploaderDropzone"],
-[data-testid="stFileUploadDropzone"] {
-    background-color: #f8fafc !important;
-    border: 1.5px dashed #cbd5e1 !important;
-    border-radius: 10px !important;
+.stTabs [aria-selected="true"] {
+    color: #6366f1;
+    border-bottom: 2px solid #6366f1;
+    font-weight: 600;
+    background: transparent;
 }
-[data-testid="stFileUploaderDropzone"]:hover,
-[data-testid="stFileUploadDropzone"]:hover {
-    border-color: #6366f1 !important;
-    background-color: #f5f3ff !important;
-}
-[data-testid="stFileUploaderDropzone"] small,
-[data-testid="stFileUploadDropzone"] small,
-[data-testid="stFileUploaderDropzone"] span {
-    color: #94a3b8 !important;
-    font-size: 0.75rem !important;
+.stTabs [data-baseweb="tab"]:hover {
+    color: #6366f1;
+    background: #f5f3ff;
 }
 
-/* ━━━ expander ━━━ */
-details > summary,
-[data-testid="stExpander"] summary,
-.streamlit-expanderHeader {
-    background-color: #f8fafc !important;
-    border: 1px solid #e2e8f0 !important;
-    border-radius: 8px !important;
-    color: #475569 !important;
-    font-size: 0.82rem !important;
-    font-weight: 500 !important;
-    padding: 10px 14px !important;
-    list-style: none !important;
-}
-details[open] > summary,
-[data-testid="stExpander"] details[open] summary {
-    border-radius: 8px 8px 0 0 !important;
-    border-bottom: none !important;
-}
-details > summary:hover,
-[data-testid="stExpander"] summary:hover {
-    border-color: #6366f1 !important;
-    color: #6366f1 !important;
-    background-color: #fafafe !important;
-}
-[data-testid="stExpander"] > div[data-testid="stExpanderDetails"],
-.streamlit-expanderContent {
-    border: 1px solid #e2e8f0 !important;
-    border-top: none !important;
-    border-radius: 0 0 8px 8px !important;
-    background: #ffffff !important;
-    padding: 12px 14px !important;
+/* 데이터프레임 헤더 */
+div[data-testid="stDataFrame"] thead tr th {
+    background: #f8fafc;
+    color: #64748b;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    border-bottom: 1px solid #e2e8f0;
 }
 
-/* ━━━ 탭 ━━━ */
-[data-baseweb="tab-list"] {
-    background: transparent !important;
-    border-bottom: 1.5px solid #e2e8f0 !important;
-    gap: 0 !important;
-}
-[data-baseweb="tab"] {
-    background: transparent !important;
-    border: none !important;
-    border-radius: 6px 6px 0 0 !important;
-    color: #94a3b8 !important;
-    font-size: 0.8rem !important;
-    font-weight: 500 !important;
-    padding: 7px 18px !important;
-}
-[data-baseweb="tab"][aria-selected="true"] {
-    color: #6366f1 !important;
-    border-bottom: 2px solid #6366f1 !important;
-    font-weight: 600 !important;
-    background: transparent !important;
-}
-[data-baseweb="tab"]:hover { color: #6366f1 !important; background: #f5f3ff !important; }
-
-/* ━━━ 데이터프레임 ━━━ */
-[data-testid="stDataFrame"] {
-    background: #ffffff !important;
-}
-[data-testid="stDataFrame"] th {
-    background-color: #f8fafc !important;
-    color: #64748b !important;
-    font-size: 0.7rem !important;
-    font-weight: 600 !important;
-    letter-spacing: 0.05em !important;
-    text-transform: uppercase !important;
-    border-bottom: 1px solid #e2e8f0 !important;
-}
-[data-testid="stDataFrame"] td {
-    color: #1e293b !important;
-    font-size: 0.8rem !important;
-}
-[data-testid="stDataFrame"] tr:hover td {
-    background-color: #f5f3ff !important;
-}
-
-/* ━━━ radio / checkbox ━━━ */
-[data-testid="stRadio"] label,
-[data-testid="stCheckbox"] label {
-    color: #475569 !important;
-    font-size: 0.82rem !important;
-}
-
-/* ━━━ caption / info ━━━ */
-[data-testid="stCaptionContainer"], .stCaption {
-    color: #94a3b8 !important;
-    font-size: 0.72rem !important;
-}
-[data-testid="stAlert"] {
-    border-radius: 10px !important;
-    border: none !important;
-    font-size: 0.8rem !important;
-}
-
-/* ━━━ 스크롤바 ━━━ */
+/* 스크롤바 */
 ::-webkit-scrollbar { width: 4px; height: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
 ::-webkit-scrollbar-thumb:hover { background: #cbd5e1; }
 
-/* ━━━ 커스텀 컴포넌트 ━━━ */
+/* 커스텀 클래스 */
 .main-title {
-    font-size: 1.45rem; font-weight: 700; color: #0f172a;
-    letter-spacing: -0.5px; margin-bottom: 0;
+    font-size: 1.45rem;
+    font-weight: 700;
+    color: #0f172a;
+    letter-spacing: -0.5px;
+    margin-bottom: 0;
 }
 .main-subtitle {
-    font-size: 0.78rem; color: #94a3b8; font-weight: 400;
+    font-size: 0.78rem;
+    color: #94a3b8;
+    font-weight: 400;
     margin-bottom: 1.4rem;
 }
 .section-header {
-    font-size: 0.7rem; font-weight: 600; color: #64748b;
-    letter-spacing: 0.09em; text-transform: uppercase;
-    padding: 0 0 7px 10px; border-left: 2px solid #6366f1;
-    margin: 1.8rem 0 0.9rem 0; background: none;
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: #64748b;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 0 0 7px 10px;
+    border-left: 2px solid #6366f1;
+    margin: 1.8rem 0 0.9rem 0;
+    background: none;
 }
 .kpi-card {
-    border-radius: 12px; padding: 16px 18px 14px; margin-bottom: 8px;
-    border: 1px solid #e2e8f0; background: #ffffff;
+    border-radius: 12px;
+    padding: 16px 18px 14px;
+    margin-bottom: 8px;
+    border: 1px solid #e2e8f0;
+    background: #ffffff;
     box-shadow: 0 1px 3px rgba(15,23,42,0.04);
     transition: box-shadow 0.15s, transform 0.15s;
 }
-.kpi-card:hover { box-shadow: 0 4px 16px rgba(15,23,42,0.08); transform: translateY(-1px); }
+.kpi-card:hover {
+    box-shadow: 0 4px 16px rgba(15,23,42,0.08);
+    transform: translateY(-1px);
+}
 .kpi-card-neutral { border-top: 2px solid #6366f1; }
 .kpi-card-pos     { border-top: 2px solid #10b981; }
 .kpi-card-neg     { border-top: 2px solid #f43f5e; }
 .kpi-card-zero    { border-top: 2px solid #cbd5e1; }
 .kpi-label {
-    font-size: 0.68rem; font-weight: 600; color: #94a3b8;
-    margin-bottom: 2px; letter-spacing: 0.06em; text-transform: uppercase;
+    font-size: 0.68rem;
+    font-weight: 600;
+    color: #94a3b8;
+    margin-bottom: 2px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
 }
 .kpi-formula {
-    font-size: 0.6rem; color: #cbd5e1; margin-bottom: 6px;
-    font-family: 'SF Mono','Fira Code',monospace; display: inline-block;
+    font-size: 0.6rem;
+    color: #cbd5e1;
+    margin-bottom: 6px;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    display: inline-block;
 }
 .kpi-value {
-    font-size: 1.4rem; font-weight: 700; letter-spacing: -0.04em; line-height: 1.2;
+    font-size: 1.4rem;
+    font-weight: 700;
+    letter-spacing: -0.04em;
+    line-height: 1.2;
 }
 .kpi-val-neutral { color: #1e293b; }
 .kpi-val-pos     { color: #059669; }
 .kpi-val-neg     { color: #e11d48; }
 .kpi-val-zero    { color: #94a3b8; }
 .period-badge {
-    display: inline-flex; align-items: center; border-radius: 6px;
-    padding: 3px 10px; font-size: 0.72rem; font-weight: 500; margin: 2px 3px;
+    display: inline-flex;
+    align-items: center;
+    border-radius: 6px;
+    padding: 3px 10px;
+    font-size: 0.72rem;
+    font-weight: 500;
+    margin: 2px 3px;
 }
-.badge-base { background:#f1f5f9; color:#475569; border:1px solid #e2e8f0; }
-.badge-curr { background:#f0fdf4; color:#15803d; border:1px solid #bbf7d0; }
+.badge-base { background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; }
+.badge-curr { background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; }
 </style>
 """, unsafe_allow_html=True)
 
