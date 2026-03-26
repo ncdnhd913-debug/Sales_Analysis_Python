@@ -44,111 +44,325 @@ st.set_page_config(
 # ── 글로벌 CSS ────────────────────────────────────────────────────────────────
 st.markdown("""
 <style>
-/* ── 기본 폰트 & 리셋 ── */
-html, body, [class*="css"] {
-    font-family: 'Pretendard', 'Noto Sans KR', 'Apple SD Gothic Neo', -apple-system, sans-serif;
+/* ══════════════════════════════════════════════════
+   1. 전역 리셋 & 폰트
+══════════════════════════════════════════════════ */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap');
+
+html, body, [class*="css"], .stApp {
+    font-family: 'Inter', 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif !important;
     -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
-/* ── 메인 타이틀 ── */
+/* ══════════════════════════════════════════════════
+   2. Streamlit 기본 UI 제거
+══════════════════════════════════════════════════ */
+#MainMenu          { visibility: hidden; }
+footer             { visibility: hidden; }
+header             { visibility: hidden; }
+.stDeployButton    { display: none; }
+
+/* ══════════════════════════════════════════════════
+   3. 메인 컨텐츠 영역
+══════════════════════════════════════════════════ */
+.block-container {
+    padding-top: 2rem !important;
+    padding-bottom: 3rem !important;
+    max-width: 1200px;
+}
+
+/* ══════════════════════════════════════════════════
+   4. 사이드바
+══════════════════════════════════════════════════ */
+[data-testid="stSidebar"] {
+    background-color: #f8fafc !important;
+    border-right: 1px solid #e2e8f0 !important;
+}
+[data-testid="stSidebar"] .block-container {
+    padding-top: 1.5rem !important;
+}
+[data-testid="stSidebar"] h1,
+[data-testid="stSidebar"] h2,
+[data-testid="stSidebar"] h3 {
+    font-size: 0.78rem !important;
+    font-weight: 600 !important;
+    color: #94a3b8 !important;
+    letter-spacing: 0.06em !important;
+    text-transform: uppercase !important;
+    margin-bottom: 0.5rem !important;
+}
+[data-testid="stSidebarNav"] { display: none; }
+
+/* ══════════════════════════════════════════════════
+   5. 버튼
+══════════════════════════════════════════════════ */
+.stButton > button {
+    border-radius: 8px !important;
+    border: 1px solid #e2e8f0 !important;
+    background-color: #ffffff !important;
+    color: #475569 !important;
+    font-size: 0.8rem !important;
+    font-weight: 500 !important;
+    padding: 6px 14px !important;
+    box-shadow: 0 1px 2px rgba(15,23,42,0.05) !important;
+    transition: all 0.15s ease !important;
+    font-family: 'Inter', 'Noto Sans KR', sans-serif !important;
+}
+.stButton > button:hover {
+    border-color: #6366f1 !important;
+    color: #6366f1 !important;
+    box-shadow: 0 0 0 3px rgba(99,102,241,0.1) !important;
+    background-color: #fafafa !important;
+}
+/* Primary 버튼 */
+.stButton > button[kind="primary"] {
+    background-color: #6366f1 !important;
+    border-color: #6366f1 !important;
+    color: #ffffff !important;
+    box-shadow: 0 1px 3px rgba(99,102,241,0.3) !important;
+}
+.stButton > button[kind="primary"]:hover {
+    background-color: #4f46e5 !important;
+    border-color: #4f46e5 !important;
+    color: #ffffff !important;
+    box-shadow: 0 4px 12px rgba(99,102,241,0.35) !important;
+}
+
+/* ══════════════════════════════════════════════════
+   6. selectbox / radio / multiselect
+══════════════════════════════════════════════════ */
+.stSelectbox > div > div,
+.stMultiSelect > div > div {
+    border-radius: 8px !important;
+    border-color: #e2e8f0 !important;
+    font-size: 0.82rem !important;
+    font-family: 'Inter', 'Noto Sans KR', sans-serif !important;
+}
+.stSelectbox > div > div:focus-within,
+.stMultiSelect > div > div:focus-within {
+    border-color: #6366f1 !important;
+    box-shadow: 0 0 0 3px rgba(99,102,241,0.1) !important;
+}
+.stRadio > label {
+    font-size: 0.82rem !important;
+    color: #475569 !important;
+}
+.stRadio > div {
+    gap: 6px !important;
+}
+
+/* ══════════════════════════════════════════════════
+   7. file uploader
+══════════════════════════════════════════════════ */
+[data-testid="stFileUploaderDropzone"] {
+    border-radius: 10px !important;
+    border: 1.5px dashed #cbd5e1 !important;
+    background: #f8fafc !important;
+    transition: all 0.15s ease !important;
+}
+[data-testid="stFileUploaderDropzone"]:hover {
+    border-color: #6366f1 !important;
+    background: #f5f3ff !important;
+}
+
+/* ══════════════════════════════════════════════════
+   8. checkbox
+══════════════════════════════════════════════════ */
+.stCheckbox > label {
+    font-size: 0.82rem !important;
+    color: #475569 !important;
+    font-family: 'Inter', 'Noto Sans KR', sans-serif !important;
+}
+
+/* ══════════════════════════════════════════════════
+   9. expander
+══════════════════════════════════════════════════ */
+.streamlit-expanderHeader {
+    font-size: 0.82rem !important;
+    font-weight: 500 !important;
+    color: #475569 !important;
+    border-radius: 8px !important;
+    background: #f8fafc !important;
+    border: 1px solid #e2e8f0 !important;
+    font-family: 'Inter', 'Noto Sans KR', sans-serif !important;
+}
+.streamlit-expanderHeader:hover {
+    border-color: #6366f1 !important;
+    color: #6366f1 !important;
+    background: #fafafa !important;
+}
+.streamlit-expanderContent {
+    border: 1px solid #e2e8f0 !important;
+    border-top: none !important;
+    border-radius: 0 0 8px 8px !important;
+    background: #ffffff !important;
+}
+
+/* ══════════════════════════════════════════════════
+   10. 탭(tabs)
+══════════════════════════════════════════════════ */
+.stTabs [data-baseweb="tab-list"] {
+    gap: 4px !important;
+    background: transparent !important;
+    border-bottom: 1px solid #e2e8f0 !important;
+    padding-bottom: 0 !important;
+}
+.stTabs [data-baseweb="tab"] {
+    border-radius: 8px 8px 0 0 !important;
+    padding: 6px 16px !important;
+    font-size: 0.8rem !important;
+    font-weight: 500 !important;
+    color: #94a3b8 !important;
+    background: transparent !important;
+    border: none !important;
+    font-family: 'Inter', 'Noto Sans KR', sans-serif !important;
+    transition: color 0.15s ease !important;
+}
+.stTabs [aria-selected="true"] {
+    color: #6366f1 !important;
+    border-bottom: 2px solid #6366f1 !important;
+    background: transparent !important;
+}
+.stTabs [data-baseweb="tab"]:hover {
+    color: #6366f1 !important;
+    background: #f5f3ff !important;
+}
+
+/* ══════════════════════════════════════════════════
+   11. 데이터프레임
+══════════════════════════════════════════════════ */
+div[data-testid="stDataFrame"] { width: 100% !important; }
+div[data-testid="stDataFrame"] table {
+    font-size: 0.8rem !important;
+    font-family: 'Inter', 'Noto Sans KR', sans-serif !important;
+    border-collapse: separate !important;
+    border-spacing: 0 !important;
+}
+div[data-testid="stDataFrame"] thead tr th {
+    background: #f8fafc !important;
+    color: #64748b !important;
+    font-weight: 600 !important;
+    font-size: 0.72rem !important;
+    letter-spacing: 0.04em !important;
+    text-transform: uppercase !important;
+    border-bottom: 1px solid #e2e8f0 !important;
+    padding: 8px 12px !important;
+}
+div[data-testid="stDataFrame"] tbody tr:hover td {
+    background: #f5f3ff !important;
+}
+
+/* ══════════════════════════════════════════════════
+   12. 메트릭 (st.metric)
+══════════════════════════════════════════════════ */
+[data-testid="stMetric"] {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 16px 20px;
+}
+[data-testid="stMetricLabel"] {
+    font-size: 0.72rem !important;
+    font-weight: 600 !important;
+    color: #94a3b8 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.06em !important;
+}
+[data-testid="stMetricValue"] {
+    font-size: 1.6rem !important;
+    font-weight: 700 !important;
+    color: #1e293b !important;
+    letter-spacing: -0.04em !important;
+}
+
+/* ══════════════════════════════════════════════════
+   13. 커스텀 컴포넌트 (기존 클래스 유지 + 개선)
+══════════════════════════════════════════════════ */
 .main-title {
     font-size: 1.5rem;
     font-weight: 700;
     color: #0f172a;
     letter-spacing: -0.6px;
-    margin-bottom: 0.1rem;
+    margin-bottom: 0;
+    font-family: 'Inter', 'Noto Sans KR', sans-serif;
 }
 .main-subtitle {
-    font-size: 0.82rem;
+    font-size: 0.8rem;
     color: #94a3b8;
     font-weight: 400;
-    margin-bottom: 1.2rem;
+    margin-bottom: 1.4rem;
+    letter-spacing: 0.01em;
 }
 
-/* ── 섹션 헤더 — 미니멀 왼쪽 accent ── */
 .section-header {
-    font-size: 0.82rem;
+    font-size: 0.72rem;
     font-weight: 600;
-    color: #475569;
-    letter-spacing: 0.06em;
+    color: #94a3b8;
+    letter-spacing: 0.08em;
     text-transform: uppercase;
-    padding: 0 0 8px 12px;
-    border-left: 3px solid #6366f1;
-    margin: 2rem 0 1rem 0;
+    padding: 0 0 8px 10px;
+    border-left: 2px solid #6366f1;
+    margin: 1.8rem 0 0.9rem 0;
     background: none;
 }
 
-/* ── KPI 카드 — 미니멀 플랫 ── */
+/* KPI 카드 */
 .kpi-card {
     border-radius: 12px;
     padding: 18px 20px 16px;
     margin-bottom: 8px;
-    border: 1px solid #f1f5f9;
+    border: 1px solid #e2e8f0;
     background: #ffffff;
-    box-shadow: 0 1px 3px rgba(15,23,42,0.04), 0 1px 2px rgba(15,23,42,0.04);
-    transition: box-shadow 0.15s ease;
+    box-shadow: 0 1px 2px rgba(15,23,42,0.04);
+    transition: box-shadow 0.15s ease, transform 0.15s ease;
 }
 .kpi-card:hover {
-    box-shadow: 0 4px 12px rgba(15,23,42,0.08);
+    box-shadow: 0 4px 16px rgba(15,23,42,0.08);
+    transform: translateY(-1px);
 }
-.kpi-card-neutral {
-    background: #ffffff;
-    border: 1px solid #e2e8f0;
-    border-top: 2px solid #6366f1;
-}
-.kpi-card-pos {
-    background: #ffffff;
-    border: 1px solid #e2e8f0;
-    border-top: 2px solid #10b981;
-}
-.kpi-card-neg {
-    background: #ffffff;
-    border: 1px solid #e2e8f0;
-    border-top: 2px solid #f43f5e;
-}
-.kpi-card-zero {
-    background: #ffffff;
-    border: 1px solid #e2e8f0;
-    border-top: 2px solid #cbd5e1;
-}
+.kpi-card-neutral { border-top: 2px solid #6366f1; }
+.kpi-card-pos     { border-top: 2px solid #10b981; }
+.kpi-card-neg     { border-top: 2px solid #f43f5e; }
+.kpi-card-zero    { border-top: 2px solid #cbd5e1; }
 
 .kpi-label {
-    font-size: 0.72rem;
+    font-size: 0.7rem;
     font-weight: 600;
     color: #94a3b8;
     margin-bottom: 2px;
-    letter-spacing: 0.04em;
+    letter-spacing: 0.05em;
     text-transform: uppercase;
+    font-family: 'Inter', 'Noto Sans KR', sans-serif;
 }
 .kpi-formula {
-    font-size: 0.65rem;
+    font-size: 0.62rem;
     color: #cbd5e1;
     margin-bottom: 8px;
     font-family: 'SF Mono', 'Fira Code', 'Courier New', monospace;
     display: inline-block;
 }
 .kpi-value {
-    font-size: 1.45rem;
+    font-size: 1.5rem;
     font-weight: 700;
-    letter-spacing: -0.8px;
+    letter-spacing: -0.04em;
     margin-top: 2px;
     line-height: 1.2;
+    font-family: 'Inter', sans-serif;
 }
 .kpi-val-neutral { color: #1e293b; }
 .kpi-val-pos     { color: #059669; }
 .kpi-val-neg     { color: #e11d48; }
 .kpi-val-zero    { color: #94a3b8; }
 
-/* ── 기간 배지 ── */
 .period-badge {
     display: inline-flex;
     align-items: center;
     border-radius: 6px;
     padding: 3px 10px;
-    font-size: 0.75rem;
-    font-weight: 600;
+    font-size: 0.72rem;
+    font-weight: 500;
     margin: 2px 3px;
-    letter-spacing: 0.01em;
 }
 .badge-base {
     background: #f1f5f9;
@@ -161,38 +375,25 @@ html, body, [class*="css"] {
     border: 1px solid #bbf7d0;
 }
 
-/* ── 데이터프레임 스타일 ── */
-div[data-testid="stDataFrame"] { width: 100% !important; }
-div[data-testid="stDataFrame"] table {
-    font-size: 0.82rem !important;
-    border-collapse: separate !important;
-    border-spacing: 0 !important;
-}
-div[data-testid="stDataFrame"] thead tr th {
-    background: #f8fafc !important;
-    color: #475569 !important;
-    font-weight: 600 !important;
-    font-size: 0.72rem !important;
-    letter-spacing: 0.04em !important;
-    text-transform: uppercase !important;
-    border-bottom: 1px solid #e2e8f0 !important;
-    padding: 8px 12px !important;
-}
+/* ══════════════════════════════════════════════════
+   14. 스크롤바 미니멀화
+══════════════════════════════════════════════════ */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: #cbd5e1; }
 
-/* ── 분석 모델 카드 ── */
-.model-card-A {
-    background: #fafafa;
-    border: 1px solid #e2e8f0;
-    border-radius: 10px;
-    padding: 14px 16px;
-    margin-bottom: 6px;
+/* ══════════════════════════════════════════════════
+   15. caption / info / warning / success
+══════════════════════════════════════════════════ */
+.stCaption, [data-testid="stCaptionContainer"] {
+    font-size: 0.72rem !important;
+    color: #94a3b8 !important;
 }
-.model-card-B {
-    background: #fafafa;
-    border: 1px solid #e2e8f0;
-    border-radius: 10px;
-    padding: 14px 16px;
-    margin-bottom: 6px;
+.stAlert {
+    border-radius: 10px !important;
+    border: none !important;
+    font-size: 0.8rem !important;
 }
 </style>
 """, unsafe_allow_html=True)
