@@ -44,197 +44,291 @@ st.set_page_config(
 # ── 글로벌 CSS ────────────────────────────────────────────────────────────────
 st.markdown("""
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+KR:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
 
-/* 폰트 */
-html, body, [class*="css"] {
-    font-family: 'Inter', 'Noto Sans KR', -apple-system, sans-serif;
+/* ── 전역 폰트 & 배경 ── */
+html, body, [class*="css"], .stApp {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
     -webkit-font-smoothing: antialiased;
-}
-
-/* 라이트모드 강제 — config.toml 미적용 대비 */
-html, body {
-    color-scheme: light only !important;
-    background-color: #ffffff !important;
-    color: #1e293b !important;
+    letter-spacing: -0.01em;
 }
 .stApp {
-    background-color: #ffffff !important;
-}
-[data-testid="stAppViewContainer"] {
-    background-color: #ffffff !important;
+    background-color: #0f0f1e !important;
 }
 [data-testid="stAppViewContainer"] > section.main {
-    background-color: #ffffff !important;
+    background-color: #0f0f1e !important;
 }
 .block-container {
-    background-color: #ffffff !important;
-    padding-top: 1.8rem;
-    padding-bottom: 2.5rem;
+    background-color: #0f0f1e !important;
+    padding-top: 2rem;
+    padding-bottom: 3rem;
 }
 
-/* 사이드바 강제 표시 및 스타일 */
-[data-testid="stSidebar"] {
+/* ── 사이드바 ── */
+[data-testid="stSidebar"],
+[data-testid="stSidebar"] > div {
     display: flex !important;
     visibility: visible !important;
-    background-color: #f8fafc !important;
-    border-right: 1px solid #e2e8f0 !important;
+    background-color: #13132a !important;
+    border-right: 1px solid rgba(124,58,237,0.15) !important;
 }
-[data-testid="stSidebar"] * {
-    color: #1e293b !important;
+[data-testid="stSidebar"] .block-container {
+    background-color: #13132a !important;
 }
 
-/* Streamlit 불필요 UI 제거 — header는 건드리지 않음 (사이드바 토글 버튼 포함) */
+/* ── Streamlit 기본 UI 제거 ── */
 #MainMenu { visibility: hidden; }
 footer    { visibility: hidden; }
 
-/* 버튼 */
+/* ── 버튼 ── */
 .stButton > button {
-    border-radius: 8px;
-    font-size: 0.82rem;
-    font-weight: 500;
-    border: 1px solid #e2e8f0;
-    background-color: #f8fafc;
-    color: #475569;
-    box-shadow: 0 1px 2px rgba(15,23,42,0.05);
-    transition: all 0.15s ease;
-    padding: 5px 14px;
+    border-radius: 8px !important;
+    font-size: 0.8rem !important;
+    font-weight: 500 !important;
+    border: 1px solid rgba(124,58,237,0.3) !important;
+    background-color: rgba(124,58,237,0.08) !important;
+    color: #c4b5fd !important;
+    box-shadow: none !important;
+    transition: all 0.2s ease !important;
+    padding: 6px 14px !important;
+    letter-spacing: 0.01em !important;
 }
 .stButton > button:hover {
-    border-color: #6366f1;
-    color: #6366f1;
-    background-color: #f5f3ff;
-    box-shadow: 0 0 0 3px rgba(99,102,241,0.1);
+    border-color: #7c3aed !important;
+    background-color: rgba(124,58,237,0.18) !important;
+    color: #ede9fe !important;
+    box-shadow: 0 0 12px rgba(124,58,237,0.25) !important;
 }
 .stButton > button[kind="primary"] {
-    background-color: #6366f1;
-    border-color: #6366f1;
-    color: #ffffff;
-    box-shadow: 0 1px 3px rgba(99,102,241,0.3);
+    background: linear-gradient(135deg, #7c3aed, #6d28d9) !important;
+    border-color: #7c3aed !important;
+    color: #ffffff !important;
+    box-shadow: 0 2px 12px rgba(124,58,237,0.4) !important;
 }
 .stButton > button[kind="primary"]:hover {
-    background-color: #4f46e5;
-    border-color: #4f46e5;
-    box-shadow: 0 4px 12px rgba(99,102,241,0.35);
+    background: linear-gradient(135deg, #8b5cf6, #7c3aed) !important;
+    box-shadow: 0 4px 20px rgba(124,58,237,0.5) !important;
 }
 
-/* 탭 */
-.stTabs [data-baseweb="tab-list"] {
-    gap: 0;
-    border-bottom: 1.5px solid #e2e8f0;
+/* ── selectbox / multiselect ── */
+[data-testid="stSelectbox"] > div > div,
+[data-testid="stMultiSelect"] > div > div {
+    border-radius: 8px !important;
+    border: 1px solid rgba(124,58,237,0.25) !important;
+    background-color: rgba(124,58,237,0.06) !important;
+    color: #e2e8f0 !important;
+    font-size: 0.82rem !important;
 }
-.stTabs [data-baseweb="tab"] {
-    border-radius: 6px 6px 0 0;
-    font-size: 0.8rem;
-    font-weight: 500;
-    padding: 7px 18px;
-    color: #94a3b8;
-    background: transparent;
-    border: none;
-}
-.stTabs [aria-selected="true"] {
-    color: #6366f1;
-    border-bottom: 2px solid #6366f1;
-    font-weight: 600;
-    background: transparent;
-}
-.stTabs [data-baseweb="tab"]:hover {
-    color: #6366f1;
-    background: #f5f3ff;
+[data-testid="stSelectbox"] > div > div:focus-within,
+[data-testid="stMultiSelect"] > div > div:focus-within {
+    border-color: #7c3aed !important;
+    box-shadow: 0 0 0 3px rgba(124,58,237,0.2) !important;
 }
 
-/* 데이터프레임 */
-div[data-testid="stDataFrame"] thead tr th {
-    background: #f8fafc;
-    color: #64748b;
-    font-size: 0.72rem;
-    font-weight: 600;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-    border-bottom: 1px solid #e2e8f0;
+/* ── radio ── */
+[data-testid="stRadio"] label,
+[data-testid="stCheckbox"] label {
+    color: #94a3b8 !important;
+    font-size: 0.82rem !important;
 }
 
-/* 스크롤바 */
+/* ── file uploader ── */
+[data-testid="stFileUploaderDropzone"],
+[data-testid="stFileUploadDropzone"] {
+    border: 1.5px dashed rgba(124,58,237,0.3) !important;
+    border-radius: 12px !important;
+    background: rgba(124,58,237,0.05) !important;
+    transition: all 0.2s ease !important;
+}
+[data-testid="stFileUploaderDropzone"]:hover {
+    border-color: #7c3aed !important;
+    background: rgba(124,58,237,0.1) !important;
+    box-shadow: 0 0 16px rgba(124,58,237,0.15) !important;
+}
+
+/* ── expander ── */
+[data-testid="stExpander"] summary,
+.streamlit-expanderHeader {
+    background-color: rgba(124,58,237,0.06) !important;
+    border: 1px solid rgba(124,58,237,0.2) !important;
+    border-radius: 10px !important;
+    color: #c4b5fd !important;
+    font-size: 0.82rem !important;
+    font-weight: 500 !important;
+    padding: 10px 14px !important;
+    transition: all 0.2s ease !important;
+}
+[data-testid="stExpander"] summary:hover {
+    border-color: #7c3aed !important;
+    background-color: rgba(124,58,237,0.12) !important;
+    box-shadow: 0 0 10px rgba(124,58,237,0.15) !important;
+}
+[data-testid="stExpander"] > div[data-testid="stExpanderDetails"] {
+    border: 1px solid rgba(124,58,237,0.2) !important;
+    border-top: none !important;
+    border-radius: 0 0 10px 10px !important;
+    background: rgba(124,58,237,0.03) !important;
+}
+
+/* ── 탭 ── */
+[data-baseweb="tab-list"] {
+    background: transparent !important;
+    border-bottom: 1px solid rgba(124,58,237,0.2) !important;
+    gap: 0 !important;
+}
+[data-baseweb="tab"] {
+    background: transparent !important;
+    border: none !important;
+    border-radius: 8px 8px 0 0 !important;
+    color: #64748b !important;
+    font-size: 0.8rem !important;
+    font-weight: 500 !important;
+    padding: 8px 18px !important;
+    letter-spacing: 0.01em !important;
+    transition: all 0.2s !important;
+}
+[data-baseweb="tab"][aria-selected="true"] {
+    color: #a78bfa !important;
+    border-bottom: 2px solid #7c3aed !important;
+    font-weight: 600 !important;
+    background: transparent !important;
+}
+[data-baseweb="tab"]:hover {
+    color: #a78bfa !important;
+    background: rgba(124,58,237,0.08) !important;
+}
+
+/* ── 데이터프레임 ── */
+[data-testid="stDataFrame"] {
+    background: rgba(255,255,255,0.02) !important;
+    border-radius: 10px !important;
+    border: 1px solid rgba(124,58,237,0.12) !important;
+    overflow: hidden !important;
+}
+[data-testid="stDataFrame"] thead tr th {
+    background: rgba(124,58,237,0.08) !important;
+    color: #7c3aed !important;
+    font-size: 0.68rem !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.08em !important;
+    text-transform: uppercase !important;
+    border-bottom: 1px solid rgba(124,58,237,0.2) !important;
+}
+[data-testid="stDataFrame"] tbody tr:hover td {
+    background: rgba(124,58,237,0.06) !important;
+}
+
+/* ── caption / info ── */
+[data-testid="stCaptionContainer"], .stCaption {
+    color: #475569 !important;
+    font-size: 0.72rem !important;
+}
+
+/* ── 스크롤바 ── */
 ::-webkit-scrollbar { width: 4px; height: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
-::-webkit-scrollbar-thumb:hover { background: #cbd5e1; }
+::-webkit-scrollbar-thumb {
+    background: rgba(124,58,237,0.3);
+    border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(124,58,237,0.5);
+}
 
-/* 커스텀 클래스 */
+/* ── 커스텀 컴포넌트 ── */
 .main-title {
-    font-size: 1.45rem;
+    font-size: 1.6rem;
     font-weight: 700;
-    color: #0f172a;
-    letter-spacing: -0.5px;
+    color: #f1f5f9;
+    letter-spacing: -0.6px;
     margin-bottom: 0;
 }
 .main-subtitle {
-    font-size: 0.78rem;
-    color: #94a3b8;
+    font-size: 0.75rem;
+    color: #475569;
     font-weight: 400;
-    margin-bottom: 1.4rem;
-}
-.section-header {
-    font-size: 0.72rem;
-    font-weight: 600;
-    color: #64748b;
+    margin-bottom: 1.6rem;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    padding: 0 0 7px 10px;
-    border-left: 2px solid #6366f1;
-    margin: 1.8rem 0 0.9rem 0;
+}
+.section-header {
+    font-size: 0.65rem;
+    font-weight: 600;
+    color: #7c3aed;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 0 0 6px 10px;
+    border-left: 2px solid #7c3aed;
+    margin: 2rem 0 1rem 0;
     background: none;
 }
+
+/* KPI 카드 — 글래스모피즘 */
 .kpi-card {
-    border-radius: 12px;
-    padding: 16px 18px 14px;
+    border-radius: 14px;
+    padding: 18px 20px 16px;
     margin-bottom: 8px;
-    border: 1px solid #e2e8f0;
-    background: #ffffff;
-    box-shadow: 0 1px 3px rgba(15,23,42,0.04);
-    transition: box-shadow 0.15s, transform 0.15s;
+    background: rgba(255,255,255,0.03) !important;
+    border: 1px solid rgba(255,255,255,0.06);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 4px 24px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.05);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
-.kpi-card:hover { box-shadow: 0 4px 16px rgba(15,23,42,0.08); transform: translateY(-1px); }
-.kpi-card-neutral { border-top: 2px solid #6366f1; }
+.kpi-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4), 0 0 0 1px rgba(124,58,237,0.2);
+}
+.kpi-card-neutral { border-top: 2px solid #7c3aed; }
 .kpi-card-pos     { border-top: 2px solid #10b981; }
 .kpi-card-neg     { border-top: 2px solid #f43f5e; }
-.kpi-card-zero    { border-top: 2px solid #cbd5e1; }
+.kpi-card-zero    { border-top: 2px solid #334155; }
+
 .kpi-label {
-    font-size: 0.68rem;
+    font-size: 0.65rem;
     font-weight: 600;
-    color: #94a3b8;
-    margin-bottom: 2px;
-    letter-spacing: 0.05em;
+    color: #475569;
+    margin-bottom: 4px;
+    letter-spacing: 0.1em;
     text-transform: uppercase;
 }
 .kpi-formula {
     font-size: 0.6rem;
-    color: #cbd5e1;
-    margin-bottom: 6px;
-    font-family: 'SF Mono', 'Fira Code', monospace;
+    color: #334155;
+    margin-bottom: 8px;
+    font-family: 'SF Mono', 'Fira Code', 'Courier New', monospace;
     display: inline-block;
 }
 .kpi-value {
-    font-size: 1.4rem;
+    font-size: 1.55rem;
     font-weight: 700;
     letter-spacing: -0.04em;
-    line-height: 1.2;
+    line-height: 1.15;
 }
-.kpi-val-neutral { color: #1e293b; }
-.kpi-val-pos     { color: #059669; }
-.kpi-val-neg     { color: #e11d48; }
-.kpi-val-zero    { color: #94a3b8; }
+.kpi-val-neutral { color: #f1f5f9; }
+.kpi-val-pos     { color: #34d399; }
+.kpi-val-neg     { color: #f87171; }
+.kpi-val-zero    { color: #475569; }
+
 .period-badge {
     display: inline-flex;
     align-items: center;
     border-radius: 6px;
     padding: 3px 10px;
-    font-size: 0.72rem;
+    font-size: 0.7rem;
     font-weight: 500;
     margin: 2px 3px;
+    letter-spacing: 0.02em;
 }
-.badge-base { background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; }
-.badge-curr { background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; }
+.badge-base {
+    background: rgba(71,85,105,0.2);
+    color: #94a3b8;
+    border: 1px solid rgba(71,85,105,0.3);
+}
+.badge-curr {
+    background: rgba(124,58,237,0.15);
+    color: #a78bfa;
+    border: 1px solid rgba(124,58,237,0.3);
+}
 </style>
 """, unsafe_allow_html=True)
 
@@ -287,31 +381,37 @@ badge_bg     = "#eef4ff" if is_model_A else "#fff8ee"
 
 if is_model_A:
     st.markdown(f"""
-    <div style="display:flex;align-items:center;gap:10px;background:#fafafa;border:1px solid #e2e8f0;
-                border-radius:10px;padding:10px 16px;margin-bottom:12px;">
-      <div style="width:6px;height:36px;background:#6366f1;border-radius:3px;flex-shrink:0;"></div>
-      <div>
-        <div style="font-size:0.82rem;font-weight:700;color:#1e293b;margin-bottom:2px;">모델 A — 원인별 임팩트 분석</div>
-        <div style="font-size:0.72rem;color:#94a3b8;font-family:'SF Mono','Fira Code',monospace;">
+    <div style="display:flex;align-items:center;gap:12px;
+                background:rgba(124,58,237,0.08);border:1px solid rgba(124,58,237,0.25);
+                border-radius:12px;padding:12px 16px;margin-bottom:14px;">
+      <div style="width:4px;height:36px;background:linear-gradient(180deg,#7c3aed,#a78bfa);
+                  border-radius:2px;flex-shrink:0;"></div>
+      <div style="flex:1;">
+        <div style="font-size:0.82rem;font-weight:600;color:#e2e8f0;margin-bottom:3px;">모델 A — 원인별 임팩트 분석</div>
+        <div style="font-size:0.68rem;color:#475569;font-family:'SF Mono','Fira Code',monospace;letter-spacing:0.02em;">
           ① (Q1−Q0)×P0_fx×ER0 &nbsp;│&nbsp; ② (P1−P0)×Q1×ER0 &nbsp;│&nbsp; ③ (ER1−ER0)×Q1×P1_fx
         </div>
       </div>
-      <span style="margin-left:auto;font-size:0.68rem;font-weight:600;background:#eef2ff;color:#6366f1;
-                   border-radius:6px;padding:3px 10px;white-space:nowrap;">재무·감사 표준</span>
+      <span style="font-size:0.65rem;font-weight:600;background:rgba(124,58,237,0.2);color:#a78bfa;
+                   border:1px solid rgba(124,58,237,0.3);border-radius:6px;padding:3px 10px;
+                   white-space:nowrap;letter-spacing:0.04em;">재무·감사 표준</span>
     </div>""", unsafe_allow_html=True)
 else:
     st.markdown(f"""
-    <div style="display:flex;align-items:center;gap:10px;background:#fafafa;border:1px solid #e2e8f0;
-                border-radius:10px;padding:10px 16px;margin-bottom:12px;">
-      <div style="width:6px;height:36px;background:#f97316;border-radius:3px;flex-shrink:0;"></div>
-      <div>
-        <div style="font-size:0.82rem;font-weight:700;color:#1e293b;margin-bottom:2px;">모델 B — 활동별 증분 분석</div>
-        <div style="font-size:0.72rem;color:#94a3b8;font-family:'SF Mono','Fira Code',monospace;">
+    <div style="display:flex;align-items:center;gap:12px;
+                background:rgba(251,146,60,0.06);border:1px solid rgba(251,146,60,0.2);
+                border-radius:12px;padding:12px 16px;margin-bottom:14px;">
+      <div style="width:4px;height:36px;background:linear-gradient(180deg,#f97316,#fb923c);
+                  border-radius:2px;flex-shrink:0;"></div>
+      <div style="flex:1;">
+        <div style="font-size:0.82rem;font-weight:600;color:#e2e8f0;margin-bottom:3px;">모델 B — 활동별 증분 분석</div>
+        <div style="font-size:0.68rem;color:#475569;font-family:'SF Mono','Fira Code',monospace;letter-spacing:0.02em;">
           ① Q↑×P1_krw / Q↓×P0_krw &nbsp;│&nbsp; ② 총차이−①−③ &nbsp;│&nbsp; ③ P/Q 4-Case
         </div>
       </div>
-      <span style="margin-left:auto;font-size:0.68rem;font-weight:600;background:#fff7ed;color:#ea580c;
-                   border-radius:6px;padding:3px 10px;white-space:nowrap;">영업·전략 보고</span>
+      <span style="font-size:0.65rem;font-weight:600;background:rgba(249,115,22,0.15);color:#fb923c;
+                   border:1px solid rgba(249,115,22,0.3);border-radius:6px;padding:3px 10px;
+                   white-space:nowrap;letter-spacing:0.04em;">영업·전략 보고</span>
     </div>""", unsafe_allow_html=True)
 
 # ── 기간 유효성 ───────────────────────────────────────────────────────────────
@@ -437,14 +537,14 @@ if is_model_A:
     kpi_card(k4, "① 수량 차이", "(Q1−Q0)×P0_fx×ER0", qty_v)
     kpi_card(k5, "② 단가 차이", "(P1−P0)×Q1×ER0", price_v)
     if all_krw:
-        k6.markdown('<div class="kpi-card kpi-card-zero"><div class="kpi-label">③ 환율 차이</div><div class="kpi-formula">(ER1−ER0)×Q1×P1_fx</div><div class="kpi-value kpi-val-zero" style="font-size:0.95rem;letter-spacing:0;">KRW 해당없음</div></div>', unsafe_allow_html=True)
+        k6.markdown('<div class="kpi-card kpi-card-zero"><div class="kpi-label">③ 환율 차이</div><div class="kpi-formula">(ER1−ER0)×Q1×P1_fx</div><div class="kpi-value kpi-val-zero" style="font-size:1rem;letter-spacing:0;">KRW 해당없음</div></div>', unsafe_allow_html=True)
     else:
         kpi_card(k6, "③ 환율 차이", "(ER1−ER0)×Q1×P1_fx", fx_v)
 else:
     kpi_card(k4, "① 수량 차이 (Volume Incremental)", "Q↑→×P1_krw / Q↓→×P0_krw", qty_v)
     kpi_card(k5, "② 단가 차이 (Negotiation Residual)", "총차이 − ① − ③", price_v)
     if all_krw:
-        k6.markdown('<div class="kpi-card kpi-card-zero"><div class="kpi-label">③ 환율 차이 (FX Exposure)</div><div class="kpi-formula">P/Q 방향 4-Case 분기</div><div class="kpi-value kpi-val-zero" style="font-size:0.95rem;letter-spacing:0;">KRW 해당없음</div></div>', unsafe_allow_html=True)
+        k6.markdown('<div class="kpi-card kpi-card-zero"><div class="kpi-label">③ 환율 차이 (FX Exposure)</div><div class="kpi-formula">P/Q 방향 4-Case 분기</div><div class="kpi-value kpi-val-zero" style="font-size:1rem;letter-spacing:0;">KRW 해당없음</div></div>', unsafe_allow_html=True)
     else:
         kpi_card(k6, "③ 환율 차이 (FX Exposure)", "P/Q 방향 4-Case 분기", fx_v)
 
@@ -709,14 +809,14 @@ if "품목계정_분류" in df_all.columns:
         d_s  = "▲ +" if c_d >= 0 else "▼ "
         d_cl = "#16a34a" if c_d >= 0 else "#dc2626"
         acct_cols[ci].markdown(f"""
-        <div style="background:white;border:1px solid #e2e8f0;border-top:4px solid {clr};
+        <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-top:2px solid {clr};
                     border-radius:10px;padding:14px 16px;">
           <div style="font-size:0.82rem;font-weight:800;color:{clr};margin-bottom:8px;">{cat}</div>
-          <div style="font-size:0.72rem;color:#64748b;">기준 매출</div>
-          <div style="font-size:0.98rem;font-weight:700;color:#1e293b;margin-bottom:5px;">{c_b:,.0f}원</div>
-          <div style="font-size:0.72rem;color:#64748b;">실적 매출</div>
-          <div style="font-size:0.98rem;font-weight:700;color:#1e293b;margin-bottom:5px;">{c_c:,.0f}원</div>
-          <div style="font-size:0.72rem;color:#64748b;">총 차이</div>
+          <div style="font-size:0.65rem;color:#475569;letter-spacing:0.06em;text-transform:uppercase;">기준 매출</div>
+          <div style="font-size:0.95rem;font-weight:600;color:#e2e8f0;margin-bottom:5px;">{c_b:,.0f}원</div>
+          <div style="font-size:0.65rem;color:#475569;letter-spacing:0.06em;text-transform:uppercase;">실적 매출</div>
+          <div style="font-size:0.95rem;font-weight:600;color:#e2e8f0;margin-bottom:5px;">{c_c:,.0f}원</div>
+          <div style="font-size:0.65rem;color:#475569;letter-spacing:0.06em;text-transform:uppercase;">총 차이</div>
           <div style="font-size:1.08rem;font-weight:900;color:{d_cl};">{d_s}{c_d:,.0f}원</div>
           <div style="font-size:0.68rem;color:#94a3b8;margin-top:4px;">
             ① {c_q:+,.0f} ② {c_p:+,.0f} ③ {c_f:+,.0f}
