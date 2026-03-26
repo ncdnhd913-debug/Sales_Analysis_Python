@@ -1086,40 +1086,58 @@ try:
     tab_wf, tab_bar = st.tabs(["🌊 Waterfall (전체 합산)", "📊 품목별 총차이"])
 
     with tab_wf:
-        # ── 분석 대상 그룹 표시 배너 ─────────────────────────────────────────
-        if has_custom and selected_groups:
-            grp_tags = "  ".join(
-                f'<span style="display:inline-block;background:{GROUP_COLORS[i % len(GROUP_COLORS)][0]};'
-                f'color:white;border-radius:12px;padding:2px 10px;font-size:0.75rem;margin:2px;">'
-                f'📦 {gn}</span>'
-                for i, gn in enumerate(selected_groups)
-            )
-            st.markdown(
-                f'<div style="background:rgba(124,58,237,0.08);border:1px solid rgba(124,58,237,0.2);'
-                f'border-radius:8px;padding:8px 14px;margin-bottom:6px;font-size:0.78rem;color:#94a3b8;">'
-                f'<span style="color:#7c3aed;font-weight:600;letter-spacing:0.05em;text-transform:uppercase;font-size:0.65rem;">분석 대상 그룹</span>&nbsp;&nbsp;{grp_tags}</div>',
-                unsafe_allow_html=True)
-        else:
-            st.caption(f"분석 대상: 전체 품목 {len(selected_items)}개")
+        # ── 상단: 분석 대상 + 단위 선택 한 줄 배치 ───────────────────────────
+        _top_left, _top_right = st.columns([5, 1])
 
-        _wf_col1, _wf_col2 = st.columns([1, 6])
-        with _wf_col1:
-            st.markdown(
-                '<div style="font-size:0.68rem;color:#475569;font-weight:600;'
-                'letter-spacing:0.06em;text-transform:uppercase;padding-top:8px;">단위</div>',
-                unsafe_allow_html=True)
-        with _wf_col2:
+        with _top_left:
+            if has_custom and selected_groups:
+                _n = len(selected_groups)
+                _total_items = sum(len(groups.get(gn, [])) for gn in selected_groups)
+                # 그룹이 많으면 개별 태그 대신 요약 텍스트로
+                if _n <= 4:
+                    _grp_parts = " · ".join(
+                        f'<span style="color:{GROUP_COLORS[i % len(GROUP_COLORS)][0]};font-weight:600;">{gn}</span>'
+                        for i, gn in enumerate(selected_groups)
+                    )
+                    _summary = f'<span style="color:#475569;font-size:0.72rem;">{_grp_parts}</span>'
+                else:
+                    _first3 = " · ".join(
+                        f'<span style="color:{GROUP_COLORS[i % len(GROUP_COLORS)][0]};font-weight:600;">{gn}</span>'
+                        for i, gn in enumerate(selected_groups[:3])
+                    )
+                    _summary = (
+                        f'<span style="color:#475569;font-size:0.72rem;">{_first3}'
+                        f'<span style="color:#334155;"> 외 {_n-3}개 그룹</span></span>'
+                    )
+                st.markdown(
+                    f'<div style="display:flex;align-items:center;gap:8px;padding:6px 0;">'
+                    f'<span style="font-size:0.6rem;font-weight:600;color:#475569;'
+                    f'letter-spacing:0.08em;text-transform:uppercase;white-space:nowrap;">분석 대상</span>'
+                    f'<span style="color:rgba(255,255,255,0.1);">|</span>'
+                    f'{_summary}'
+                    f'<span style="font-size:0.65rem;color:#334155;margin-left:4px;">({_total_items}개 품목)</span>'
+                    f'</div>',
+                    unsafe_allow_html=True)
+            else:
+                st.markdown(
+                    f'<div style="font-size:0.72rem;color:#475569;padding:6px 0;">'
+                    f'전체 품목 {len(selected_items)}개</div>',
+                    unsafe_allow_html=True)
+
+        with _top_right:
             _wf_unit = st.radio(
                 "단위",
-                ["백만원", "원"],
+                ["M원", "원"],
                 index=0,
                 horizontal=True,
                 key="wf_unit_sel",
-                label_visibility="collapsed",
             )
+        # radio 값 매핑
+        _wf_unit_real = "백만원" if _wf_unit == "M원" else "원"
+
         fig_wf = render_waterfall(total_base, qty_v, price_v, fx_v,
                                   total_curr, base_label, curr_label, accent_color,
-                                  unit=_wf_unit)
+                                  unit=_wf_unit_real)
         st.plotly_chart(fig_wf, use_container_width=True)
 
         with st.expander("🔢 Waterfall 계산 근거 데이터", expanded=False):
