@@ -36,30 +36,7 @@ def render_sidebar():
         st.markdown("## 📂 파일 업로드")
         uploaded = st.file_uploader("ERP 매출실적 (.xlsx / .xls)", type=["xlsx", "xls"])
 
-        st.markdown("---")
-        st.markdown("### 📋 품목 그룹 설정 불러오기")
-        grp_uploaded = st.file_uploader(
-            "그룹 설정 엑셀 업로드 (.xlsx)",
-            type=["xlsx"],
-            key="sidebar_group_upload",
-        )
-        if grp_uploaded:
-            # file_id로 중복 처리 방지 — rerun 후 무한루프 차단
-            fid = getattr(grp_uploaded, "file_id", grp_uploaded.name)
-            if st.session_state.get("_last_grp_file_id") != fid:
-                mapping = _parse_group_excel(grp_uploaded.read())
-                if mapping:
-                    st.session_state.item_mapping = mapping
-                    st.session_state["_last_grp_file_id"] = fid
-                    st.session_state.pop("group_editor_table", None)
-                    st.session_state.pop("ms_groups", None)
-                    st.session_state.pop("known_custom_groups", None)
-                    st.success(f"{len(mapping)}개 품목 그룹 불러오기 완료")
-                    st.rerun()
-                else:
-                    st.session_state["_last_grp_file_id"] = fid
-                    st.error("형식 오류 (품목명·커스텀 그룹명 열 필요)")
-        st.markdown("---")
+
 
         if uploaded:
             df_all = load_excel(uploaded.read(), uploaded.name)
