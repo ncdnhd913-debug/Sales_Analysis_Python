@@ -64,16 +64,30 @@ html, body, [class*="css"], .stApp {
     padding-bottom: 3rem;
 }
 
-/* ── 사이드바 ── */
+/* ── 사이드바 너비 및 스타일 ── */
 [data-testid="stSidebar"],
 [data-testid="stSidebar"] > div {
     display: flex !important;
     visibility: visible !important;
     background-color: #13132a !important;
     border-right: 1px solid rgba(124,58,237,0.15) !important;
+    min-width: 260px !important;
+    max-width: 260px !important;
+    width: 260px !important;
 }
 [data-testid="stSidebar"] .block-container {
     background-color: #13132a !important;
+    padding: 1rem 0.8rem !important;
+}
+/* 파일 업로더 텍스트 크기 축소 */
+[data-testid="stFileUploaderDropzone"] p,
+[data-testid="stFileUploaderDropzone"] small,
+[data-testid="stFileUploaderDropzone"] span {
+    font-size: 0.72rem !important;
+}
+[data-testid="stFileUploaderDropzone"] {
+    padding: 12px 10px !important;
+    min-height: 70px !important;
 }
 
 /* ── Streamlit 기본 UI 제거 ── */
@@ -451,20 +465,13 @@ group_names = list(groups.keys())
 st.markdown('<div class="section-header">📦 분석 대상 선택</div>', unsafe_allow_html=True)
 
 if has_custom:
-    # ── 커스텀 그룹이 있는 경우 ──────────────────────────────────────────────
-    # key 직접 초기화 방식 — default 파라미터 없이 session_state만 사용
-    # (default + key 동시 사용 시 리런마다 default로 리셋되는 Streamlit 버그 회피)
-
-    # 처음 접근 시에만 초기화
+    # ── 커스텀 그룹이 있는 경우: 드롭박스 + 체크박스 융합 UI ─────────────────
     if "ms_groups" not in st.session_state:
         st.session_state["ms_groups"] = list(custom_group_names)
 
-    # 삭제된 그룹 정리
     st.session_state["ms_groups"] = [
         g for g in st.session_state["ms_groups"] if g in group_names
     ]
-
-    # 진짜 새로 생긴 그룹만 자동 추가 (기존에 없던 것만)
     if "known_custom_groups" not in st.session_state:
         st.session_state["known_custom_groups"] = set()
     truly_new = [g for g in custom_group_names
@@ -474,28 +481,80 @@ if has_custom:
             st.session_state["ms_groups"].append(g)
     st.session_state["known_custom_groups"] = set(custom_group_names)
 
-    # default 없이 key만 — session_state 값이 그대로 유지됨
-    selected_groups = st.multiselect(
-        "그룹 선택 (기본: 커스텀 그룹 전체)",
-        options=group_names,
-        key="ms_groups",
-        placeholder="그룹을 선택하세요",
-    )
+    # ── 드롭박스: 그룹 선택 ──────────────────────────────────────────────────
+    with st.expander(
+        f"📦 그룹 선택 — {len(st.session_state['ms_groups'])}개 선택됨  ▾",
+        expanded=False,
+    ):
+        _c1, _c2 = st.columns(2)
+        with _c1:
+            if st.button("전체 선택", key="sel_all_grp", use_container_width=True):
+                st.session_state["ms_groups"] = list(custom_group_names)
+                st.rerun()
+        with _c2:
+            if st.button("전체 해제", key="sel_none_grp", use_container_width=True):
+                st.session_state["ms_groups"] = []
+                st.rerun()
 
-    # 선택된 그룹의 품목 전체 = 분석 대상
+        st.markdown("<div style='height:4px'></div>", unsafe_allow_html=True)
+
+        for gi, gn in enumerate(group_names):
+            clr = GROUP_COLORS[gi % len(GROUP_COLORS)][0]
+            checked = gn in st.session_state["ms_groups"]
+            new_val = st.checkbox(
+                gn,
+                value=checked,
+                key=f"chk_grp_{gn}",
+            )
+            if new_val != checked:
+                if new_val:
+                    if gn not in st.session_state["ms_groups"]:
+                        st.session_state["ms_groups"].append(gn)
+                else:
+                    st.session_state["ms_groups"] = [
+                        x for x in st.session_state["ms_groups"] if x != gn
+                    ]
+                st.rerun()
+
+    selected_groups = [g for g in st.session_state["ms_groups"] if g in group_names]
     selected_items = [
         item for gn in selected_groups for item in groups.get(gn, [])
     ]
 else:
-    # ── 커스텀 그룹 없는 경우: 품목 직접 선택 ───────────────────────────────
-    st.caption("💡 품목 그룹 설정을 완료하면 그룹 단위로 선택할 수 있습니다.")
-    selected_items = st.multiselect(
-        "품목 선택 (기본: 전체)",
-        options=all_items,
-        default=all_items,
-        key="ms_items",
-        placeholder="품목을 선택하세요",
-    )
+    # ── 커스텀 그룹 없는 경우: 드롭박스 + 체크박스 융합 (품목 단위) ───────────
+    if "ms_items_state" not in st.session_state:
+        st.session_state["ms_items_state"] = list(all_items)
+
+    with st.expander(
+        f"📋 품목 선택 — {len(st.session_state['ms_items_state'])}개 선택됨  ▾",
+        expanded=False,
+    ):
+        _c1, _c2 = st.columns(2)
+        with _c1:
+            if st.button("전체 선택", key="sel_all_items", use_container_width=True):
+                st.session_state["ms_items_state"] = list(all_items)
+                st.rerun()
+        with _c2:
+            if st.button("전체 해제", key="sel_none_items", use_container_width=True):
+                st.session_state["ms_items_state"] = []
+                st.rerun()
+
+        st.markdown("<div style='height:4px'></div>", unsafe_allow_html=True)
+
+        for item in all_items:
+            checked = item in st.session_state["ms_items_state"]
+            new_val = st.checkbox(item, value=checked, key=f"chk_item_{item}")
+            if new_val != checked:
+                if new_val:
+                    if item not in st.session_state["ms_items_state"]:
+                        st.session_state["ms_items_state"].append(item)
+                else:
+                    st.session_state["ms_items_state"] = [
+                        x for x in st.session_state["ms_items_state"] if x != item
+                    ]
+                st.rerun()
+
+    selected_items = [i for i in st.session_state["ms_items_state"] if i in all_items]
     selected_groups = []
 
 if not selected_items:
