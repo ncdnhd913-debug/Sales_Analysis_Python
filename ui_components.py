@@ -71,7 +71,7 @@ def render_waterfall(
 
     use_M = (unit == "백만원")
     DIV   = 1_000_000 if use_M else 1
-    sfx   = "M" if use_M else ""
+    sfx   = ""  # Y축 suffix 없이 숫자만 표시
 
     def bar_color(v): return CLR_UP if v >= 0 else CLR_DOWN
     def fmt_diff(v):
@@ -146,10 +146,10 @@ def render_waterfall(
             zeroline=False,
         ),
         yaxis=dict(
-            title=unit_lbl,
+            title=f"({unit_lbl})" if use_M else "(원)",
             title_font=dict(size=10, color="#475569"),
             tickfont=dict(size=10, color="#475569", family="Inter, sans-serif"),
-            ticksuffix=sfx,
+            tickformat=",",
             gridcolor="rgba(124,58,237,0.15)",
             gridwidth=1,
             zeroline=True,
