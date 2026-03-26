@@ -1,4 +1,4 @@
-# ══════════════════════════════════════════════════════════════════════════════
+\# ══════════════════════════════════════════════════════════════════════════════
 # app.py  —  Streamlit 진입점 (오케스트레이션만 담당)
 # ══════════════════════════════════════════════════════════════════════════════
 import os, sys
@@ -56,6 +56,12 @@ html, body, [class*="css"] {
 #MainMenu { visibility: hidden; }
 footer    { visibility: hidden; }
 header    { visibility: hidden; }
+
+/* 사이드바 강제 표시 */
+[data-testid="stSidebar"] {
+    display: flex !important;
+    visibility: visible !important;
+}
 
 /* 메인 컨텐츠 여백 */
 .block-container {
