@@ -1,21 +1,12 @@
 [theme]
-# 메인 포인트 컬러 — 인디고 계열
+base = "light"
 primaryColor = "#6366f1"
-
-# 앱 전체 배경
 backgroundColor = "#ffffff"
-
-# 사이드바·카드 배경
 secondaryBackgroundColor = "#f8fafc"
-
-# 기본 텍스트 (완전 검정 대신 짙은 슬레이트)
 textColor = "#1e293b"
-
-# 기본 폰트
 font = "sans serif"
 
 [server]
-# 파일 변경 감시 (Cloud에서는 무시됨)
 runOnSave = false
 
 [browser]
