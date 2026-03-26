@@ -60,34 +60,29 @@ html, body, [class*="css"], .stApp {
 }
 .block-container {
     background-color: #0f0f1e !important;
-    padding-top: 2rem;
+    padding-top: 3rem;
     padding-bottom: 3rem;
 }
 
-/* ── 사이드바 너비 및 스타일 ── */
+/* ── 사이드바 스타일 (너비는 Streamlit 기본 사용) ── */
 [data-testid="stSidebar"],
 [data-testid="stSidebar"] > div {
     display: flex !important;
     visibility: visible !important;
     background-color: #13132a !important;
     border-right: 1px solid rgba(124,58,237,0.15) !important;
-    min-width: 260px !important;
-    max-width: 260px !important;
-    width: 260px !important;
 }
 [data-testid="stSidebar"] .block-container {
     background-color: #13132a !important;
-    padding: 1rem 0.8rem !important;
+    padding: 1.2rem 1rem !important;
 }
-/* 파일 업로더 텍스트 크기 축소 */
-[data-testid="stFileUploaderDropzone"] p,
-[data-testid="stFileUploaderDropzone"] small,
-[data-testid="stFileUploaderDropzone"] span {
-    font-size: 0.72rem !important;
-}
+/* 파일 업로더 컴팩트 */
 [data-testid="stFileUploaderDropzone"] {
-    padding: 12px 10px !important;
-    min-height: 70px !important;
+    padding: 10px 12px !important;
+    min-height: 65px !important;
+}
+[data-testid="stFileUploaderDropzone"] small {
+    font-size: 0.7rem !important;
 }
 
 /* ── Streamlit 기본 UI 제거 ── */
@@ -459,7 +454,19 @@ if unassigned:
     groups["미분류"] = unassigned
 
 has_custom = len(custom_groups) > 0
-custom_group_names = list(custom_groups.keys())
+
+# 그룹 내 품목 매출 합산 → 내림차순 정렬
+def _grp_rev(gn):
+    items = custom_groups.get(gn, [])
+    sub = va[va["품목명"].isin(items)]
+    return sub["매출1"].sum() if not sub.empty else 0
+
+custom_group_names = sorted(custom_groups.keys(), key=_grp_rev, reverse=True)
+# groups도 정렬 순서 반영
+_sorted_groups = {gn: custom_groups[gn] for gn in custom_group_names}
+if unassigned:
+    _sorted_groups["미분류"] = unassigned
+groups = _sorted_groups
 group_names = list(groups.keys())
 
 st.markdown('<div class="section-header">📦 분석 대상 선택</div>', unsafe_allow_html=True)
