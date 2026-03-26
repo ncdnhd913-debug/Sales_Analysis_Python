@@ -17,8 +17,8 @@ def styled_df(df: pd.DataFrame, money_cols: list):
     def color_cell(v):
         try:
             fv = float(v)
-            if fv < 0:   return "color:#c0392b; font-weight:600"
-            elif fv > 0: return "color:#1a7a4a; font-weight:600"
+            if fv < 0:   return "color:#f87171; font-weight:600"
+            elif fv > 0: return "color:#34d399; font-weight:600"
         except Exception:
             pass
         return ""
@@ -98,7 +98,7 @@ def render_waterfall(
             name="", x=[x], y=[y], base=[0 if i == 4 else base],
             marker_color=clr, marker_line=dict(color=lclr, width=1.5),
             text=[txt], textposition="outside",
-            textfont=dict(size=12, color="#334155", family="Pretendard, Noto Sans KR, sans-serif"),
+            textfont=dict(size=12, color="#e2e8f0", family="Inter, Noto Sans KR, sans-serif"),
             showlegend=False, width=0.55,
         ))
 
@@ -113,17 +113,17 @@ def render_waterfall(
     diff_pct  = f"({diff_val/total_base*100:+.1f}%)" if total_base != 0 else ""
     fig.update_layout(
         title_text=f"{base_label} → {curr_label}  ·  총차이 {diff_sign}{diff_val:,.0f}원 {diff_pct}",
-        title_font=dict(size=13, color="#475569", family="Pretendard, Noto Sans KR, sans-serif"),
+        title_font=dict(size=13, color="#94a3b8", family="Inter, Noto Sans KR, sans-serif"),
         title_x=0.01,
         barmode="stack",
         height=460,
         margin=dict(t=60, b=40, l=50, r=50),
-        plot_bgcolor="#ffffff",
-        paper_bgcolor="#ffffff",
+        plot_bgcolor="#0f0f1e",
+        paper_bgcolor="#0f0f1e",
         showlegend=False,
-        font=dict(family="Pretendard, Noto Sans KR, Apple SD Gothic Neo, sans-serif", size=12, color="#475569"),
+        font=dict(family="Inter, Noto Sans KR, sans-serif", size=12, color="#94a3b8"),
         xaxis=dict(
-            tickfont=dict(size=11, color="#64748b"),
+            tickfont=dict(size=11, color="#64748b", family="Inter, sans-serif"),
             tickangle=0,
             showgrid=False,
             showline=False,
@@ -131,11 +131,11 @@ def render_waterfall(
         ),
         yaxis=dict(
             title="",
-            tickfont=dict(size=10, color="#94a3b8"),
-            gridcolor="#f1f5f9",
+            tickfont=dict(size=10, color="#475569", family="Inter, sans-serif"),
+            gridcolor="rgba(124,58,237,0.15)",
             gridwidth=1,
             zeroline=True,
-            zerolinecolor="#e2e8f0",
+            zerolinecolor="rgba(124,58,237,0.3)",
             zerolinewidth=1,
             showline=False,
         ),
