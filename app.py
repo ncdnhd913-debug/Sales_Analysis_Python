@@ -94,33 +94,70 @@ header    { visibility: hidden; }
     text-transform: uppercase !important;
 }
 
-/* ── 버튼 ── */
-.stButton > button {
+/* ── 모든 버튼 공통 (Browse files 포함) ── */
+button,
+.stButton > button,
+[data-testid="stFileUploaderDropzone"] button,
+[data-testid="baseButton-secondary"],
+[data-testid="baseButton-primary"] {
     border-radius: 8px !important;
-    border: 1px solid #e2e8f0 !important;
-    background-color: #ffffff !important;
-    color: #475569 !important;
     font-size: 0.8rem !important;
     font-weight: 500 !important;
-    padding: 6px 14px !important;
-    box-shadow: 0 1px 2px rgba(15,23,42,0.05) !important;
+    padding: 6px 16px !important;
     transition: all 0.15s ease !important;
+    font-family: 'Inter', 'Noto Sans KR', sans-serif !important;
+    cursor: pointer !important;
 }
-.stButton > button:hover {
+
+/* Secondary / 기본 버튼 */
+.stButton > button,
+[data-testid="baseButton-secondary"] {
+    background-color: #ffffff !important;
+    color: #475569 !important;
+    border: 1px solid #e2e8f0 !important;
+    box-shadow: 0 1px 2px rgba(15,23,42,0.05) !important;
+}
+.stButton > button:hover,
+[data-testid="baseButton-secondary"]:hover {
     border-color: #6366f1 !important;
     color: #6366f1 !important;
     box-shadow: 0 0 0 3px rgba(99,102,241,0.1) !important;
     background-color: #fafafe !important;
 }
+
+/* Primary 버튼 */
 .stButton > button[kind="primary"],
-.stButton > button[data-testid*="primary"] {
+[data-testid="baseButton-primary"] {
     background-color: #6366f1 !important;
-    border-color: #6366f1 !important;
+    border: 1px solid #6366f1 !important;
     color: #ffffff !important;
+    box-shadow: 0 1px 3px rgba(99,102,241,0.3) !important;
 }
-.stButton > button[kind="primary"]:hover {
+.stButton > button[kind="primary"]:hover,
+[data-testid="baseButton-primary"]:hover {
     background-color: #4f46e5 !important;
+    border-color: #4f46e5 !important;
     box-shadow: 0 4px 12px rgba(99,102,241,0.35) !important;
+}
+
+/* Browse files 버튼 전용 (파일 업로더) */
+[data-testid="stFileUploaderDropzone"] button,
+[data-testid="stFileUploadDropzone"] button,
+.stFileUploader button,
+section[data-testid="stFileUploaderDropzone"] button {
+    background-color: #f8fafc !important;
+    color: #475569 !important;
+    border: 1px solid #e2e8f0 !important;
+    box-shadow: 0 1px 2px rgba(15,23,42,0.04) !important;
+    border-radius: 8px !important;
+    font-size: 0.8rem !important;
+    font-weight: 500 !important;
+    padding: 6px 16px !important;
+}
+[data-testid="stFileUploaderDropzone"] button:hover {
+    background-color: #f5f3ff !important;
+    border-color: #6366f1 !important;
+    color: #6366f1 !important;
 }
 
 /* ── selectbox / multiselect ── */
