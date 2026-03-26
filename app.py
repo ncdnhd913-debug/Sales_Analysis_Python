@@ -52,24 +52,43 @@ html, body, [class*="css"] {
     -webkit-font-smoothing: antialiased;
 }
 
-/* Streamlit 기본 불필요 UI 제거 */
-#MainMenu { visibility: hidden; }
-footer    { visibility: hidden; }
-header    { visibility: hidden; }
-
-/* 사이드바 강제 표시 */
-[data-testid="stSidebar"] {
-    display: flex !important;
-    visibility: visible !important;
+/* 라이트모드 강제 — config.toml 미적용 대비 */
+html, body {
+    color-scheme: light only !important;
+    background-color: #ffffff !important;
+    color: #1e293b !important;
 }
-
-/* 메인 컨텐츠 여백 */
+.stApp {
+    background-color: #ffffff !important;
+}
+[data-testid="stAppViewContainer"] {
+    background-color: #ffffff !important;
+}
+[data-testid="stAppViewContainer"] > section.main {
+    background-color: #ffffff !important;
+}
 .block-container {
+    background-color: #ffffff !important;
     padding-top: 1.8rem;
     padding-bottom: 2.5rem;
 }
 
-/* 버튼 — 기본 secondary */
+/* 사이드바 강제 표시 및 스타일 */
+[data-testid="stSidebar"] {
+    display: flex !important;
+    visibility: visible !important;
+    background-color: #f8fafc !important;
+    border-right: 1px solid #e2e8f0 !important;
+}
+[data-testid="stSidebar"] * {
+    color: #1e293b !important;
+}
+
+/* Streamlit 불필요 UI 제거 — header는 건드리지 않음 (사이드바 토글 버튼 포함) */
+#MainMenu { visibility: hidden; }
+footer    { visibility: hidden; }
+
+/* 버튼 */
 .stButton > button {
     border-radius: 8px;
     font-size: 0.82rem;
@@ -87,7 +106,6 @@ header    { visibility: hidden; }
     background-color: #f5f3ff;
     box-shadow: 0 0 0 3px rgba(99,102,241,0.1);
 }
-/* Primary 버튼 */
 .stButton > button[kind="primary"] {
     background-color: #6366f1;
     border-color: #6366f1;
@@ -125,7 +143,7 @@ header    { visibility: hidden; }
     background: #f5f3ff;
 }
 
-/* 데이터프레임 헤더 */
+/* 데이터프레임 */
 div[data-testid="stDataFrame"] thead tr th {
     background: #f8fafc;
     color: #64748b;
@@ -176,10 +194,7 @@ div[data-testid="stDataFrame"] thead tr th {
     box-shadow: 0 1px 3px rgba(15,23,42,0.04);
     transition: box-shadow 0.15s, transform 0.15s;
 }
-.kpi-card:hover {
-    box-shadow: 0 4px 16px rgba(15,23,42,0.08);
-    transform: translateY(-1px);
-}
+.kpi-card:hover { box-shadow: 0 4px 16px rgba(15,23,42,0.08); transform: translateY(-1px); }
 .kpi-card-neutral { border-top: 2px solid #6366f1; }
 .kpi-card-pos     { border-top: 2px solid #10b981; }
 .kpi-card-neg     { border-top: 2px solid #f43f5e; }
