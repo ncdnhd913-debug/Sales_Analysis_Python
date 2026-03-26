@@ -32,22 +32,26 @@ def styled_df(df: pd.DataFrame, money_cols: list):
 
 
 def kpi_card(col, label: str, formula: str, value: float, neutral: bool = False):
-    """단일 KPI 카드 렌더링. col = st.columns() 반환값 중 하나."""
+    """단일 KPI 카드 렌더링 (미니멀 플랫 디자인)."""
     sign = "+" if value > 0 else ""
     if neutral:
         card_cls, val_cls = "kpi-card-neutral", "kpi-val-neutral"
+        trend = ""
     elif value > 0:
         card_cls, val_cls = "kpi-card-pos", "kpi-val-pos"
+        trend = '<span style="font-size:0.68rem;font-weight:600;color:#10b981;background:#f0fdf4;border-radius:4px;padding:1px 6px;margin-left:6px;">▲</span>'
     elif value < 0:
         card_cls, val_cls = "kpi-card-neg", "kpi-val-neg"
+        trend = '<span style="font-size:0.68rem;font-weight:600;color:#f43f5e;background:#fff1f2;border-radius:4px;padding:1px 6px;margin-left:6px;">▼</span>'
     else:
         card_cls, val_cls = "kpi-card-zero", "kpi-val-zero"
+        trend = ""
 
     col.markdown(f"""
     <div class="kpi-card {card_cls}">
-        <div class="kpi-label">{label}</div>
+        <div class="kpi-label">{label}{trend}</div>
         <div class="kpi-formula">{formula}</div>
-        <div class="kpi-value {val_cls}">{sign}{value:,.0f} 원</div>
+        <div class="kpi-value {val_cls}">{sign}{value:,.0f}<span style="font-size:0.8rem;font-weight:400;color:inherit;opacity:0.6;margin-left:3px;">원</span></div>
     </div>""", unsafe_allow_html=True)
 
 
@@ -58,11 +62,11 @@ def render_waterfall(
     """Waterfall 차트(plotly) Figure 반환."""
     import plotly.graph_objects as go
 
-    CLR_BASE = "#2d5faa"
-    CLR_CURR = "#1a7a4a"
-    CLR_UP   = "#27ae60"
-    CLR_DOWN = "#e74c3c"
-    CLR_CONN = "#bdc3c7"
+    CLR_BASE = "#6366f1"
+    CLR_CURR = "#0ea5e9"
+    CLR_UP   = "#10b981"
+    CLR_DOWN = "#f43f5e"
+    CLR_CONN = "#e2e8f0"
 
     def bar_color(v): return CLR_UP if v >= 0 else CLR_DOWN
     def fmt_diff(v):
@@ -94,8 +98,7 @@ def render_waterfall(
             name="", x=[x], y=[y], base=[0 if i == 4 else base],
             marker_color=clr, marker_line=dict(color=lclr, width=1.5),
             text=[txt], textposition="outside",
-            textfont=dict(size=13, color="#0d1f3c",
-                          family="Malgun Gothic, AppleGothic, sans-serif"),
+            textfont=dict(size=12, color="#334155", family="Pretendard, Noto Sans KR, sans-serif"),
             showlegend=False, width=0.55,
         ))
 
@@ -109,18 +112,33 @@ def render_waterfall(
     diff_sign = "▲ +" if diff_val >= 0 else "▼ "
     diff_pct  = f"({diff_val/total_base*100:+.1f}%)" if total_base != 0 else ""
     fig.update_layout(
-        title_text=f"매출 차이 분석 Waterfall  |  {base_label} → {curr_label}  |  "
-                   f"총차이: {diff_sign}{diff_val:,.0f}원 {diff_pct}",
-        title_font_size=14, title_font_color="#0d1f3c", title_x=0.01,
-        barmode="stack", height=500,
-        margin=dict(t=80, b=60, l=60, r=60),
-        plot_bgcolor="#fafbfd", paper_bgcolor="#ffffff", showlegend=False,
-        font=dict(family="Malgun Gothic, AppleGothic, sans-serif"),
-        xaxis=dict(tickfont=dict(size=12, color="#0d1f3c"), tickangle=0),
-        yaxis=dict(title="원화 매출 (₩)", title_font=dict(size=12, color="#3a4a65"),
-                   tickfont=dict(size=11, color="#3a4a65"),
-                   gridcolor="#e8ecf3", gridwidth=1,
-                   zeroline=True, zerolinecolor="#8a95a8", zerolinewidth=1.5),
+        title_text=f"{base_label} → {curr_label}  ·  총차이 {diff_sign}{diff_val:,.0f}원 {diff_pct}",
+        title_font=dict(size=13, color="#475569", family="Pretendard, Noto Sans KR, sans-serif"),
+        title_x=0.01,
+        barmode="stack",
+        height=460,
+        margin=dict(t=60, b=40, l=50, r=50),
+        plot_bgcolor="#ffffff",
+        paper_bgcolor="#ffffff",
+        showlegend=False,
+        font=dict(family="Pretendard, Noto Sans KR, Apple SD Gothic Neo, sans-serif", size=12, color="#475569"),
+        xaxis=dict(
+            tickfont=dict(size=11, color="#64748b"),
+            tickangle=0,
+            showgrid=False,
+            showline=False,
+            zeroline=False,
+        ),
+        yaxis=dict(
+            title="",
+            tickfont=dict(size=10, color="#94a3b8"),
+            gridcolor="#f1f5f9",
+            gridwidth=1,
+            zeroline=True,
+            zerolinecolor="#e2e8f0",
+            zerolinewidth=1,
+            showline=False,
+        ),
     )
     return fig
 
