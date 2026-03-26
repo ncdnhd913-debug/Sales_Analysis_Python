@@ -1127,13 +1127,13 @@ try:
         with _top_right:
             _wf_unit = st.radio(
                 "단위",
-                ["M원", "원"],
+                ["백만원", "원"],
                 index=0,
                 horizontal=True,
                 key="wf_unit_sel",
             )
         # radio 값 매핑
-        _wf_unit_real = "백만원" if _wf_unit == "M원" else "원"
+        _wf_unit_real = _wf_unit  # 그대로 전달
 
         fig_wf = render_waterfall(total_base, qty_v, price_v, fx_v,
                                   total_curr, base_label, curr_label, accent_color,
