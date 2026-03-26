@@ -64,25 +64,52 @@ html, body, [class*="css"], .stApp {
     padding-bottom: 3rem;
 }
 
-/* ── 사이드바 스타일 (너비는 Streamlit 기본 사용) ── */
-[data-testid="stSidebar"],
-[data-testid="stSidebar"] > div {
-    display: flex !important;
+/* ── 사이드바 스타일 ── */
+section[data-testid="stSidebar"] {
+    display: block !important;
     visibility: visible !important;
     background-color: #13132a !important;
     border-right: 1px solid rgba(124,58,237,0.15) !important;
+    overflow: hidden !important;
+}
+section[data-testid="stSidebar"] > div {
+    background-color: #13132a !important;
+    overflow-x: hidden !important;
 }
 [data-testid="stSidebar"] .block-container {
     background-color: #13132a !important;
-    padding: 1.2rem 1rem !important;
+    padding: 1.2rem 0.9rem !important;
+    overflow-x: hidden !important;
+    max-width: 100% !important;
 }
-/* 파일 업로더 컴팩트 */
+/* 파일 업로더 컴팩트 — 텍스트 줄바꿈 허용 */
 [data-testid="stFileUploaderDropzone"] {
-    padding: 10px 12px !important;
-    min-height: 65px !important;
+    padding: 8px 10px !important;
+    min-height: 58px !important;
 }
+[data-testid="stFileUploaderDropzone"] p,
+[data-testid="stFileUploaderDropzone"] span,
 [data-testid="stFileUploaderDropzone"] small {
-    font-size: 0.7rem !important;
+    font-size: 0.68rem !important;
+    white-space: normal !important;
+    word-break: break-word !important;
+    overflow-wrap: break-word !important;
+}
+/* 사이드바 내 모든 텍스트 overflow 방지 */
+[data-testid="stSidebar"] label,
+[data-testid="stSidebar"] .stMarkdown p,
+[data-testid="stSidebar"] .stSelectbox label,
+[data-testid="stSidebar"] .stRadio label {
+    font-size: 0.78rem !important;
+    white-space: normal !important;
+    word-break: break-word !important;
+}
+/* period badge — 작게 */
+.period-badge {
+    font-size: 0.64rem !important;
+    padding: 2px 6px !important;
+    white-space: nowrap !important;
+    white-space: nowrap;
 }
 
 /* ── Streamlit 기본 UI 제거 ── */
@@ -261,14 +288,14 @@ footer    { visibility: hidden; }
     text-transform: uppercase;
 }
 .section-header {
-    font-size: 0.65rem;
-    font-weight: 600;
-    color: #7c3aed;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    padding: 0 0 6px 10px;
-    border-left: 2px solid #7c3aed;
-    margin: 2rem 0 1rem 0;
+    font-size: 1.0rem;
+    font-weight: 700;
+    color: #c4b5fd;
+    letter-spacing: 0.01em;
+    text-transform: none;
+    padding: 0 0 9px 14px;
+    border-left: 3px solid #7c3aed;
+    margin: 2rem 0 1.1rem 0;
     background: none;
 }
 
@@ -924,15 +951,31 @@ try:
                 for i, gn in enumerate(selected_groups)
             )
             st.markdown(
-                f'<div style="background:var(--background-color,#f8fafc);border:0.5px solid #e2e8f0;'
-                f'border-radius:8px;padding:8px 14px;margin-bottom:6px;font-size:0.8rem;color:#64748b;">'
-                f'<b>분석 대상 그룹:</b>&nbsp;&nbsp;{grp_tags}</div>',
+                f'<div style="background:rgba(124,58,237,0.08);border:1px solid rgba(124,58,237,0.2);'
+                f'border-radius:8px;padding:8px 14px;margin-bottom:6px;font-size:0.78rem;color:#94a3b8;">'
+                f'<span style="color:#7c3aed;font-weight:600;letter-spacing:0.05em;text-transform:uppercase;font-size:0.65rem;">분석 대상 그룹</span>&nbsp;&nbsp;{grp_tags}</div>',
                 unsafe_allow_html=True)
         else:
             st.caption(f"분석 대상: 전체 품목 {len(selected_items)}개")
 
+        _wf_col1, _wf_col2 = st.columns([1, 6])
+        with _wf_col1:
+            st.markdown(
+                '<div style="font-size:0.68rem;color:#475569;font-weight:600;'
+                'letter-spacing:0.06em;text-transform:uppercase;padding-top:8px;">단위</div>',
+                unsafe_allow_html=True)
+        with _wf_col2:
+            _wf_unit = st.radio(
+                "단위",
+                ["백만원", "원"],
+                index=0,
+                horizontal=True,
+                key="wf_unit_sel",
+                label_visibility="collapsed",
+            )
         fig_wf = render_waterfall(total_base, qty_v, price_v, fx_v,
-                                  total_curr, base_label, curr_label, accent_color)
+                                  total_curr, base_label, curr_label, accent_color,
+                                  unit=_wf_unit)
         st.plotly_chart(fig_wf, use_container_width=True)
 
         with st.expander("🔢 Waterfall 계산 근거 데이터", expanded=False):
