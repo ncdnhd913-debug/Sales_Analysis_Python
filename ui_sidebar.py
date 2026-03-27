@@ -72,8 +72,16 @@ def render_sidebar():
                 curr_label = f"{curr_year}년 {MONTH_KR[curr_month]}"
 
             st.markdown(
-                f'<span class="period-badge badge-base">기준: {base_label}</span>'
-                f'<span class="period-badge badge-curr">실적: {curr_label}</span>',
+                f'<div style="margin-top:4px;">'
+                f'<div style="display:inline-block;background:rgba(71,85,105,0.25);'
+                f'color:#cbd5e1;border:1px solid rgba(100,116,139,0.4);border-radius:6px;'
+                f'padding:3px 8px;font-size:0.72rem;font-weight:600;margin-bottom:3px;'
+                f'white-space:normal;word-break:keep-all;">기준: {base_label}</div><br>'
+                f'<div style="display:inline-block;background:rgba(124,58,237,0.2);'
+                f'color:#c4b5fd;border:1px solid rgba(124,58,237,0.4);border-radius:6px;'
+                f'padding:3px 8px;font-size:0.72rem;font-weight:600;margin-top:2px;'
+                f'white-space:normal;word-break:keep-all;">실적: {curr_label}</div>'
+                f'</div>',
                 unsafe_allow_html=True,
             )
 
