@@ -65,8 +65,8 @@ def render_sidebar():
 
             if is_ytd:
                 ytd_months = list(range(1, curr_month + 1))
-                base_label = f"{base_year}년 1~{curr_month}월 누적"
-                curr_label = f"{curr_year}년 1~{curr_month}월 누적"
+                base_label = f"{base_year}년 1월~{curr_month}월 누적"
+                curr_label = f"{curr_year}년 1월~{curr_month}월 누적"
             else:
                 base_label = f"{base_year}년 {MONTH_KR[base_month]}"
                 curr_label = f"{curr_year}년 {MONTH_KR[curr_month]}"
