@@ -113,7 +113,7 @@ def render_waterfall(
             marker_color=clr, marker_line=dict(color=lclr, width=1.5),
             text=[txt], textposition="outside",
             textfont=dict(size=12, color="#e2e8f0", family="Inter, Noto Sans KR, sans-serif"),
-            showlegend=False, width=0.55,
+            showlegend=False, width=0.38,
         ))
 
     connector_y = [_b, _b+_q, _b+_q+_p, _b+_q+_p+_f]
@@ -144,6 +144,10 @@ def render_waterfall(
             showgrid=False,
             showline=False,
             zeroline=False,
+        ),
+        transition=dict(
+            duration=600,
+            easing="cubic-in-out",
         ),
         yaxis=dict(
             title=f"({unit_lbl})" if use_M else "(원)",
