@@ -106,10 +106,10 @@ section[data-testid="stSidebar"] > div {
 }
 /* period badge — 작게 */
 .period-badge {
-    font-size: 0.64rem !important;
-    padding: 2px 6px !important;
+    font-size: 0.72rem !important;
+    padding: 3px 8px !important;
     white-space: nowrap !important;
-    white-space: nowrap;
+    font-weight: 500 !important;
 }
 
 /* ── Streamlit 기본 UI 제거 ── */
@@ -290,7 +290,7 @@ footer    { visibility: hidden; }
 .section-header {
     font-size: 1.0rem;
     font-weight: 700;
-    color: #c4b5fd;
+    color: #e2e8f0;
     letter-spacing: 0.01em;
     text-transform: none;
     padding: 0 0 9px 14px;
@@ -350,20 +350,20 @@ footer    { visibility: hidden; }
     align-items: center;
     border-radius: 6px;
     padding: 3px 10px;
-    font-size: 0.7rem;
-    font-weight: 500;
+    font-size: 0.72rem;
+    font-weight: 600;
     margin: 2px 3px;
-    letter-spacing: 0.02em;
+    letter-spacing: 0.01em;
 }
 .badge-base {
-    background: rgba(71,85,105,0.2);
-    color: #94a3b8;
-    border: 1px solid rgba(71,85,105,0.3);
+    background: rgba(71,85,105,0.25);
+    color: #cbd5e1;
+    border: 1px solid rgba(100,116,139,0.4);
 }
 .badge-curr {
-    background: rgba(124,58,237,0.15);
-    color: #a78bfa;
-    border: 1px solid rgba(124,58,237,0.3);
+    background: rgba(124,58,237,0.2);
+    color: #c4b5fd;
+    border: 1px solid rgba(124,58,237,0.4);
 }
 </style>
 """, unsafe_allow_html=True)
@@ -424,7 +424,7 @@ if is_model_A:
                   border-radius:2px;flex-shrink:0;"></div>
       <div style="flex:1;">
         <div style="font-size:0.82rem;font-weight:600;color:#e2e8f0;margin-bottom:3px;">모델 A — 원인별 임팩트 분석</div>
-        <div style="font-size:0.68rem;color:#475569;font-family:'SF Mono','Fira Code',monospace;letter-spacing:0.02em;">
+        <div style="font-size:0.68rem;color:#94a3b8;font-family:'Inter','Noto Sans KR',sans-serif;letter-spacing:0.02em;">
           ① (Q1−Q0)×P0_fx×ER0 &nbsp;│&nbsp; ② (P1−P0)×Q1×ER0 &nbsp;│&nbsp; ③ (ER1−ER0)×Q1×P1_fx
         </div>
       </div>
@@ -441,7 +441,7 @@ else:
                   border-radius:2px;flex-shrink:0;"></div>
       <div style="flex:1;">
         <div style="font-size:0.82rem;font-weight:600;color:#e2e8f0;margin-bottom:3px;">모델 B — 활동별 증분 분석</div>
-        <div style="font-size:0.68rem;color:#475569;font-family:'SF Mono','Fira Code',monospace;letter-spacing:0.02em;">
+        <div style="font-size:0.68rem;color:#94a3b8;font-family:'Inter','Noto Sans KR',sans-serif;letter-spacing:0.02em;">
           ① Q↑×P1_krw / Q↓×P0_krw &nbsp;│&nbsp; ② 총차이−①−③ &nbsp;│&nbsp; ③ P/Q 4-Case
         </div>
       </div>
@@ -790,11 +790,13 @@ def _show_split_table(df_with_total: "pd.DataFrame", money_cols: list):
         cfg = {}
         for col in df.columns:
             if col in money_cols:
-                cfg[col] = st.column_config.NumberColumn(col, format="%,.0f", width="medium")
-            elif col in ("품목명", "그룹", "환종"):
-                cfg[col] = st.column_config.TextColumn(col, width="large")
+                cfg[col] = st.column_config.NumberColumn(col, format="%,.0f", width=160)
+            elif col in ("품목명", "그룹"):
+                cfg[col] = st.column_config.TextColumn(col, width=220)
+            elif col == "환종":
+                cfg[col] = st.column_config.TextColumn(col, width=70)
             else:
-                cfg[col] = st.column_config.TextColumn(col, width="small")
+                cfg[col] = st.column_config.TextColumn(col, width=100)
         return cfg
 
     col_cfg = _make_col_config(data_df)
@@ -917,11 +919,15 @@ def _render_group_section(grp_list, grp_map, color_map, va_src, va_detail_src, s
                 styler = styler.applymap(color, subset=[c])
         return styler
 
+    _grp_cfg = {"그룹": st.column_config.TextColumn("그룹", width=220)}
+    for _c in money_c:
+        _grp_cfg[_c] = st.column_config.NumberColumn(_c, format="%,.0f", width=160)
     st.dataframe(
         _style_data(tbl_df),
         use_container_width=True,
         hide_index=True,
         height=min(460, max(80, len(tbl_df)*36+40)),
+        column_config=_grp_cfg,
     )
 
     # 합계 행 — 별도 고정 테이블 (정렬 영향 없음)
@@ -952,6 +958,7 @@ def _render_group_section(grp_list, grp_map, color_map, va_src, va_detail_src, s
         use_container_width=True,
         hide_index=True,
         height=70,
+        column_config=_grp_cfg,
     )
 
     # ③ 선택된 그룹의 품목별 상세
@@ -965,17 +972,13 @@ def _render_group_section(grp_list, grp_map, color_map, va_src, va_detail_src, s
         title = f"📦 {selected_drp} — 세부 품목 ({len(drp_items)}개)"
 
     if drp_items:
-        st.markdown(
-            f'<div style="background:{clr2};border-radius:7px;padding:6px 14px;'
-            f'color:white;font-size:0.82rem;font-weight:700;margin:8px 0 6px 0;">'
-            f'{title}</div>',
-            unsafe_allow_html=True)
-        drp_va = va_src[va_src["품목명"].isin(drp_items)]
-        drp_vd = va_detail_src[va_detail_src["품목명"].isin(drp_items)]
-        dtbl, dmc = build_table(
-            drp_vd if show_detail else drp_va,
-            base_label, curr_label, show_detail)
-        _show_split_table(dtbl, dmc)
+        with st.expander(f"{title}  ({len(drp_items)}개 품목)", expanded=True):
+            drp_va = va_src[va_src["품목명"].isin(drp_items)]
+            drp_vd = va_detail_src[va_detail_src["품목명"].isin(drp_items)]
+            dtbl, dmc = build_table(
+                drp_vd if show_detail else drp_va,
+                base_label, curr_label, show_detail)
+            _show_split_table(dtbl, dmc)
 
 
 # ── va_disp_total 항상 정의 (다운로드용) ─────────────────────────────────────
