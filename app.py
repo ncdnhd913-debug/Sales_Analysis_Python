@@ -678,6 +678,13 @@ if st.session_state.get("_ai_param_key") != _ai_key:
     st.session_state["_ai_param_key"] = _ai_key
     st.session_state.pop("_ai_result", None)
 
+st.markdown(
+    '<div style="font-size:0.7rem;color:#475569;background:rgba(251,191,36,0.07);'
+    'border:1px solid rgba(251,191,36,0.2);border-radius:8px;padding:7px 12px;margin-bottom:8px;">'
+    '⚠️ <b style="color:#fbbf24;">API 비용 안내</b> — 분석 1회당 약 $0.002~0.005(약 3~7원) 소요됩니다. '
+    'Anthropic 계정 크레딧에서 차감되며, 무료 크레딧($5) 소진 후 유료 결제가 필요합니다.</div>',
+    unsafe_allow_html=True
+)
 if st.button("✨ AI 분석 시작", key="btn_ai_analysis", type="primary"):
     st.session_state.pop("_ai_result", None)
     _grp_str  = ", ".join(selected_groups) if selected_groups else "전체"
@@ -995,7 +1002,7 @@ else:
 # ==============================================================================
 if "품목계정_분류" in df_all.columns:
     st.markdown('<div class="section-header">🗂️ 품목계정별 차이 분석</div>', unsafe_allow_html=True)
-    st.caption("제품 / 상품 / 기타(원재료·부재료·제조-수선비) 기준 집계 — 각 탭은 커스텀 그룹 단위로 표시")
+    st.caption("제품 / 상품 / 기타(원재료·부재료·제조-수선비) 기준 집계 — 각 탭은 커스텀 그룹 단위로 표시 / 세부 드롭다운 선택으로 품목 상세 확인")
 
     acct_map = (
         df_all[["품목명", "품목계정_분류"]]
@@ -1008,7 +1015,7 @@ if "품목계정_분류" in df_all.columns:
     # ── KPI 카드 (제품/상품/기타 합산) ────────────────────────────────────────
     acct_cols = st.columns(3)
     for ci, cat in enumerate(ACCT_CATS):
-        cat_items = [i for i in selected_items if acct_map.get(i,"기타") == cat]
+        cat_items = [i for i in va["품목명"].unique() if acct_map.get(i,"기타") == cat]
         sub  = va_filtered[va_filtered["품목명"].isin(cat_items)]
         c_b  = sub["매출0"].sum(); c_c = sub["매출1"].sum()
         c_d  = sub["총차이"].sum()
@@ -1039,9 +1046,9 @@ if "품목계정_분류" in df_all.columns:
     for ti, cat_label in enumerate(["전체"] + ACCT_CATS):
         with acct_tab_list[ti]:
             if cat_label == "전체":
-                tab_items = selected_items
+                tab_items = list(va["품목명"].unique())
             else:
-                tab_items = [i for i in selected_items if acct_map.get(i,"기타") == cat_label]
+                tab_items = [i for i in va["품목명"].unique() if acct_map.get(i,"기타") == cat_label]
 
             if not tab_items:
                 st.info(f"{cat_label} 분류의 데이터가 없습니다.")
@@ -1051,7 +1058,7 @@ if "품목계정_분류" in df_all.columns:
                 # 커스텀 그룹 단위로 표시
                 # 해당 탭 품목이 속한 그룹만 추려서 표시
                 tab_grp_map = {}
-                for gn in selected_groups:
+                for gn in custom_group_names:
                     grp_tab_items = [i for i in groups.get(gn,[]) if i in tab_items]
                     if grp_tab_items:
                         tab_grp_map[gn] = grp_tab_items
@@ -1062,14 +1069,14 @@ if "품목계정_분류" in df_all.columns:
                     for i, gn in enumerate(list(groups.keys()))
                     if gn != "미분류"
                 }
-                tab_va  = va_filtered[va_filtered["품목명"].isin(tab_items)]
-                tab_vd  = va_detail_filtered[va_detail_filtered["품목명"].isin(tab_items)]
+                tab_va  = va[va["품목명"].isin(tab_items)]
+                tab_vd  = va_detail[va_detail["품목명"].isin(tab_items)]
                 _render_group_section(tab_grp_list, tab_grp_map, grp_colors_acct,
                                      tab_va, tab_vd, f"drp_acct_{cat_label}")
             else:
                 # 커스텀 그룹 없으면 품목명 단위 테이블
-                sub_va = va_filtered[va_filtered["품목명"].isin(tab_items)].copy()
-                sub_vd = va_detail_filtered[va_detail_filtered["품목명"].isin(tab_items)].copy()
+                sub_va = va[va["품목명"].isin(tab_items)].copy()
+                sub_vd = va_detail[va_detail["품목명"].isin(tab_items)].copy()
                 tbl, mc = build_table(sub_vd if show_detail else sub_va,
                                       base_label, curr_label, show_detail)
                 _show_split_table(tbl, mc)
@@ -1083,7 +1090,7 @@ st.markdown('<div class="section-header">📊 차이 구성 요소 시각화</di
 try:
     import plotly.graph_objects as go
 
-    tab_wf, tab_bar = st.tabs(["🌊 Waterfall (전체 합산)", "📊 품목별 총차이"])
+    tab_wf, = st.tabs(["🌊 Waterfall (전체 합산)"])
 
     with tab_wf:
         # ── 상단: 분석 대상 + 단위 선택 한 줄 배치 ───────────────────────────
@@ -1223,29 +1230,7 @@ try:
                 use_container_width=True, hide_index=True,
             )
 
-    with tab_bar:
-        va_bar     = va_filtered.set_index("품목명")["총차이"].sort_values()
-        bar_colors = ["#e74c3c" if v < 0 else "#27ae60" for v in va_bar.values]
-        bar_text   = [f"▼ {v:,.0f}" if v < 0 else (f"▲ +{v:,.0f}" if v > 0 else f"{v:,.0f}")
-                      for v in va_bar.values]
-        fig_bar = go.Figure(go.Bar(
-            x=va_bar.values, y=va_bar.index, orientation="h",
-            marker_color=bar_colors,
-            marker_line=dict(color=["#b03a2e" if v<0 else "#1e8449" for v in va_bar.values], width=1),
-            text=bar_text, textposition="outside",
-            textfont=dict(size=12, color="#0d1f3c", family="Malgun Gothic, AppleGothic, sans-serif"),
-        ))
-        fig_bar.update_layout(
-            title_text="품목별 총 매출 차이", title_font_size=14, title_x=0.01,
-            height=max(380, len(va_bar)*40),
-            margin=dict(l=10, r=140, t=50, b=30),
-            plot_bgcolor="#fafbfd", paper_bgcolor="#ffffff",
-            font=dict(family="Malgun Gothic, AppleGothic, sans-serif"),
-            xaxis=dict(title="원화 매출 차이 (₩)", gridcolor="#e8ecf3",
-                       zeroline=True, zerolinecolor="#5a6a85", zerolinewidth=2),
-            yaxis=dict(tickfont=dict(size=12, color="#0d1f3c"), automargin=True),
-        )
-        st.plotly_chart(fig_bar, use_container_width=True)
+
 
 except ImportError:
     st.info("plotly가 설치되지 않아 차트를 표시할 수 없습니다.")
