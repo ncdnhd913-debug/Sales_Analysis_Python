@@ -825,7 +825,7 @@ def _show_split_table(df_with_total: "pd.DataFrame", money_cols: list):
             styler = df.style.format(fmt, na_rep="-")
             for c in df.columns:
                 fn = color if c in money_cols else (lambda v: "font-weight:700")
-                styler = styler.map(fn, subset=[c])
+                styler = styler.applymap(fn, subset=[c])
             return styler
 
         st.dataframe(
@@ -916,7 +916,7 @@ def _render_group_section(grp_list, grp_map, color_map, va_src, va_detail_src, s
         styler = df.style.format(fmt, na_rep="-")
         for c in diff_cols:
             if c in df.columns:
-                styler = styler.map(color, subset=[c])
+                styler = styler.applymap(color, subset=[c])
         return styler
 
     _grp_cfg = {"그룹": st.column_config.TextColumn("그룹", width=220)}
@@ -947,7 +947,7 @@ def _render_group_section(grp_list, grp_map, color_map, va_src, va_detail_src, s
         fmt = {c: "{:,.0f}" for c in money_c}
         styler = df.style.format(fmt, na_rep="-")
         for c in df.columns:
-            styler = styler.map(
+            styler = styler.applymap(
                 (lambda v: color(v)) if c in diff_cols else (lambda v: "font-weight:700"),
                 subset=[c]
             )
