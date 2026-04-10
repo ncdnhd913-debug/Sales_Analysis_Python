@@ -27,7 +27,7 @@ def styled_df(df: pd.DataFrame, money_cols: list):
     styler   = df.style.format(fmt_dict, na_rep="-")
     for c in money_cols:
         if c in df.columns:
-            styler = styler.applymap(color_cell, subset=[c])
+            styler = styler.map(color_cell, subset=[c])
     return styler
 
 
